@@ -1,0 +1,2753 @@
+{
+  "name": "2 - Client Booked → Onboarding Chain.",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "1db415ac-36a5-479f-92ec-a211054d0b6c",
+        "options": {}
+      },
+      "id": "ce66c64d-1260-4348-ae3b-0cf1d3a2e26a",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        816,
+        112
+      ],
+      "webhookId": "1db415ac-36a5-479f-92ec-a211054d0b6c"
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "appaWvyZoO9HZgCF7",
+          "mode": "list",
+          "cachedResultName": "Agency Client Onboarding System",
+          "cachedResultUrl": "https://airtable.com/appaWvyZoO9HZgCF7"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblQH9ubfXvtt3Td3",
+          "mode": "list",
+          "cachedResultName": "Client DB",
+          "cachedResultUrl": "https://airtable.com/appaWvyZoO9HZgCF7/tblQH9ubfXvtt3Td3"
+        },
+        "filterByFormula": "=AND({Email} = \"{{ $json.body.payload.attendees[0].email }}\", {Status} = \"New Lead\")",
+        "options": {}
+      },
+      "id": "93cfa5df-498d-4759-8a57-36dddb6c164e",
+      "name": "Search records",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        1024,
+        112
+      ],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "ufMGFfHN4FQmo5LF",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "resource": "project",
+        "operation": "create",
+        "name": "={{ $json.fields.Name }} - Onboarding",
+        "workspace": "1217172808415169",
+        "team": "1217172808415171",
+        "additionalFields": {}
+      },
+      "id": "f93dc694-fe8b-4145-bffc-5dea5e431744",
+      "name": "Create a project",
+      "type": "n8n-nodes-base.asana",
+      "typeVersion": 1,
+      "position": [
+        1216,
+        112
+      ],
+      "retryOnFail": true,
+      "credentials": {
+        "asanaOAuth2Api": {
+          "id": "oVo38pGgPmEDt2XR",
+          "name": "Asana account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "value": "appaWvyZoO9HZgCF7",
+          "mode": "list",
+          "cachedResultName": "Agency Client Onboarding System",
+          "cachedResultUrl": "https://airtable.com/appaWvyZoO9HZgCF7"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblQH9ubfXvtt3Td3",
+          "mode": "list",
+          "cachedResultName": "Client DB",
+          "cachedResultUrl": "https://airtable.com/appaWvyZoO9HZgCF7/tblQH9ubfXvtt3Td3"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $('Search records').item.json.id }}",
+            "Asana Project ID": "={{ $json.gid }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": false
+            },
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Phone",
+              "displayName": "Phone",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Services Requested",
+              "displayName": "Services Requested",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "options": [
+                {
+                  "name": "Design",
+                  "value": "Design"
+                },
+                {
+                  "name": "Development",
+                  "value": "Development"
+                }
+              ],
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "New Lead",
+                  "value": "New Lead"
+                },
+                {
+                  "name": "Booked",
+                  "value": "Booked"
+                },
+                {
+                  "name": "Onboarded",
+                  "value": "Onboarded"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Date Captured",
+              "displayName": "Date Captured",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Booking Date/Time",
+              "displayName": "Booking Date/Time",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Asana Project ID",
+              "displayName": "Asana Project ID",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Drive Folder ID",
+              "displayName": "Drive Folder ID",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Activity log",
+              "displayName": "Activity log",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "cd5dec4b-2782-4c28-95b6-30c9e08e7547",
+      "name": "Update Asana ID",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        1376,
+        112
+      ],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "ufMGFfHN4FQmo5LF",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "dc456e00-271c-476d-98d8-6cda9c97d308",
+              "leftValue": "={{ $('Search records').item.json.fields['Drive Folder ID'] }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "9ba1169c-c38c-4932-b6e3-7b3c5c9827b0",
+      "name": "If (google drive folder not exist)",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1552,
+        112
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "folder",
+        "name": "={{ $('Search records').item.json.fields.Name }}",
+        "driveId": {
+          "__rl": true,
+          "value": "My Drive",
+          "mode": "list",
+          "cachedResultName": "My Drive",
+          "cachedResultUrl": "https://drive.google.com/drive/my-drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "1YIzP07UdOY35EnNw7maath2gGsnwHd0w",
+          "mode": "list",
+          "cachedResultName": "Web design agency client projects",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1YIzP07UdOY35EnNw7maath2gGsnwHd0w"
+        },
+        "options": {}
+      },
+      "id": "18e03cdf-6b6b-4b5b-a98d-0ec3131af1bf",
+      "name": "Create folder for each client",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1712,
+        -144
+      ],
+      "retryOnFail": true,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "A5p5Yg6DV2tVRwCC",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "value": "appaWvyZoO9HZgCF7",
+          "mode": "list",
+          "cachedResultName": "Agency Client Onboarding System",
+          "cachedResultUrl": "https://airtable.com/appaWvyZoO9HZgCF7"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblQH9ubfXvtt3Td3",
+          "mode": "list",
+          "cachedResultName": "Client DB",
+          "cachedResultUrl": "https://airtable.com/appaWvyZoO9HZgCF7/tblQH9ubfXvtt3Td3"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $('Search records').item.json.id }}",
+            "Drive Folder ID": "={{ $json.id }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": false
+            },
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Phone",
+              "displayName": "Phone",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Services Requested",
+              "displayName": "Services Requested",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "options": [
+                {
+                  "name": "Design",
+                  "value": "Design"
+                },
+                {
+                  "name": "Development",
+                  "value": "Development"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "New Lead",
+                  "value": "New Lead"
+                },
+                {
+                  "name": "Booked",
+                  "value": "Booked"
+                },
+                {
+                  "name": "Onboarded",
+                  "value": "Onboarded"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Date Captured",
+              "displayName": "Date Captured",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Booking Date/Time",
+              "displayName": "Booking Date/Time",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Asana Project ID",
+              "displayName": "Asana Project ID",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Drive Folder ID",
+              "displayName": "Drive Folder ID",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Activity log",
+              "displayName": "Activity log",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "3307877b-d617-4f8d-8006-2f378532660f",
+      "name": "Update folder ID",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        1872,
+        -144
+      ],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "ufMGFfHN4FQmo5LF",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a1",
+              "name": "parent_folder_id",
+              "value": "={{ $('Create folder for each client').item.json.id }}",
+              "type": "string"
+            },
+            {
+              "id": "a2",
+              "name": "services",
+              "value": "={{ $('Search records').item.json.fields['Services Requested'] }}",
+              "type": "array"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "1d5153c3-3d5c-46b5-a498-684a5edaacdc",
+      "name": "Prep new client folder",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        2032,
+        -144
+      ]
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "services",
+        "include": "allOtherFields",
+        "options": {}
+      },
+      "id": "baac9dd3-c368-4740-9264-7286bb277f36",
+      "name": "Split Out client service to create subfolder",
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        2208,
+        128
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Search records').item.json.fields.Email }}",
+        "subject": "Welcome aboard, let's get started",
+        "message": "=Hi {{ $('Search records').item.json.fields.Name }},\n\nExcited to officially kick off your {{ $('Search records').item.json.fields['Services Requested'] }} project with us!\n\nHere's what happens next: our team is already setting things up on our end, and you'll hear from your point of contact shortly with next steps.\n\nTalk soon,\nTheAyo Automation Agency",
+        "options": {}
+      },
+      "id": "b577d9ee-43e1-437c-912c-a619b6e40ea7",
+      "name": "Send a message to client",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        2560,
+        -80
+      ],
+      "executeOnce": true,
+      "webhookId": "83162c10-ccf8-41d1-a3f5-09e75f0ee7b6",
+      "retryOnFail": true,
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "2E261wDqoizvgQEP",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "fileFolder",
+        "queryString": "={{ $json.services }}",
+        "filter": {
+          "folderId": {
+            "__rl": true,
+            "value": "={{ $json.parent_folder_id }}",
+            "mode": "id"
+          }
+        },
+        "options": {}
+      },
+      "id": "e3946c09-250e-4a3c-b744-98a3a08797be",
+      "name": "Search folders if subfolder already existed",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        2816,
+        144
+      ],
+      "alwaysOutputData": true,
+      "retryOnFail": true,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "A5p5Yg6DV2tVRwCC",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "eca204e2-b4df-4189-8f1d-a4b0c9b61c42",
+              "leftValue": "={{ $json.id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "d2870a30-fe5f-43e3-a6a6-8792ce26a270",
+      "name": "If it doesn't",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        3120,
+        144
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "folder",
+        "name": "={{ $('Loop over services').item.json.services }}",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "={{ $('Loop over services').item.json.parent_folder_id }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "id": "ffb0e826-2bbe-479b-af06-dc090ecdb79c",
+      "name": "Create subfolder",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        3264,
+        -80
+      ],
+      "retryOnFail": true,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "A5p5Yg6DV2tVRwCC",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "dad6ae43-c7b2-46e8-a76e-0d0d75ce12b9",
+              "name": "folder_id",
+              "value": "={{ $json.id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "46f3df83-04bf-41ff-8a76-f3e4c8a2029b",
+      "name": "Set ID of subfolder-",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        3408,
+        -80
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "folder",
+        "name": "={{ $('Loop over services').item.json.services }} - {{ $('Create a project').item.json.gid }}",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "={{ $json.folder_id }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "id": "247d2150-fdbe-4cb0-95bf-e4c6607149f5",
+      "name": "Create Asana project folder in subfolder",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        3568,
+        160
+      ],
+      "retryOnFail": true,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "A5p5Yg6DV2tVRwCC",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "284378cb-c6d2-4c93-ac73-42eb0fa59638",
+      "name": "Loop over services",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        2432,
+        128
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "dad6ae43-c7b2-46e8-a76e-0d0d75ce12b9",
+              "name": "folder_id",
+              "value": "={{ $json.id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "d8730a3c-05bc-403c-83db-73adcabff117",
+      "name": "Set ID of subfolder",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        3376,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b1",
+              "name": "parent_folder_id",
+              "value": "={{ $('Search records').item.json.fields['Drive Folder ID'] }}",
+              "type": "string"
+            },
+            {
+              "id": "b2",
+              "name": "services",
+              "value": "={{ $('Search records').item.json.fields['Services Requested'] }}",
+              "type": "array"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "d75f323f-9054-4b34-b7ec-2385887c4d3c",
+      "name": "Prep existing client folder",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        1872,
+        128
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "workspace": "1217172808415169",
+        "name": "Kick off call with client, confirm project scope",
+        "otherProperties": {
+          "assignee": "={{ $json.Email }}",
+          "projects": "={{ $('Create a project').item.json.gid }}"
+        }
+      },
+      "type": "n8n-nodes-base.asana",
+      "typeVersion": 1,
+      "position": [
+        1904,
+        528
+      ],
+      "id": "438767e4-5e92-431e-bf39-78a57bc022ed",
+      "name": "Create a task",
+      "retryOnFail": true,
+      "credentials": {
+        "asanaOAuth2Api": {
+          "id": "oVo38pGgPmEDt2XR",
+          "name": "Asana account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "appaWvyZoO9HZgCF7",
+          "mode": "list",
+          "cachedResultName": "Agency Client Onboarding System",
+          "cachedResultUrl": "https://airtable.com/appaWvyZoO9HZgCF7"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblFNlUvnJ8LVRiv3",
+          "mode": "list",
+          "cachedResultName": "Team DB",
+          "cachedResultUrl": "https://airtable.com/appaWvyZoO9HZgCF7/tblFNlUvnJ8LVRiv3"
+        },
+        "filterByFormula": "{Role} = \"Account Manager\"",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        1568,
+        528
+      ],
+      "id": "3e39c79c-58fa-490d-a2dc-12b9185b67c8",
+      "name": "Search records for account managers",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "ufMGFfHN4FQmo5LF",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "//**Code node — pick the least busy person\n\nconst team = $input.all().map(item => item.json.fields);\nconst chosen = team.reduce((lowest, current) => \n  current['Active Projects'] < lowest['Active Projects'] ? current : lowest\n);\nreturn [{ json: chosen }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1744,
+        528
+      ],
+      "id": "c011bab9-12c2-488e-96b0-aa6abc5ba141",
+      "name": "Pick the least busy manager"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "value": "appaWvyZoO9HZgCF7",
+          "mode": "list",
+          "cachedResultName": "Agency Client Onboarding System",
+          "cachedResultUrl": "https://airtable.com/appaWvyZoO9HZgCF7"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblFNlUvnJ8LVRiv3",
+          "mode": "list",
+          "cachedResultName": "Team DB",
+          "cachedResultUrl": "https://airtable.com/appaWvyZoO9HZgCF7/tblFNlUvnJ8LVRiv3"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Email": "={{ $('Pick the least busy manager').item.json.Email }}",
+            "Active Projects": "={{ $('Pick the least busy manager').item.json['Active Projects'] + 1 }}"
+          },
+          "matchingColumns": [
+            "Email"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Role",
+              "displayName": "Role",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Account Manager",
+                  "value": "Account Manager"
+                },
+                {
+                  "name": "Designer",
+                  "value": "Designer"
+                },
+                {
+                  "name": "Developer",
+                  "value": "Developer"
+                }
+              ],
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Active Projects",
+              "displayName": "Active Projects",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        2080,
+        528
+      ],
+      "id": "ffb1cc70-12a0-4523-a34f-22cc93aec90b",
+      "name": "Increase activity of manager + 1",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "ufMGFfHN4FQmo5LF",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "appaWvyZoO9HZgCF7",
+          "mode": "list",
+          "cachedResultName": "Agency Client Onboarding System",
+          "cachedResultUrl": "https://airtable.com/appaWvyZoO9HZgCF7"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tbl4RJtgb9nYuugfD",
+          "mode": "list",
+          "cachedResultName": "Activity log",
+          "cachedResultUrl": "https://airtable.com/appaWvyZoO9HZgCF7/tbl4RJtgb9nYuugfD"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Client": "={{ [$('Search records').first().json.id] }}",
+            "Activity Type": "Task Assigned",
+            "Details": "=Account Manager assigned: {{ $json.fields.Name }}",
+            "Timestamp": "={{ $now }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "ID",
+              "displayName": "ID",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Client",
+              "displayName": "Client",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Activity Type",
+              "displayName": "Activity Type",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "New Lead Created",
+                  "value": "New Lead Created"
+                },
+                {
+                  "name": "Booking Confirmed",
+                  "value": "Booking Confirmed"
+                },
+                {
+                  "name": "Project Created",
+                  "value": "Project Created"
+                },
+                {
+                  "name": "Folder Created",
+                  "value": "Folder Created"
+                },
+                {
+                  "name": "New Engagement Started",
+                  "value": "New Engagement Started"
+                },
+                {
+                  "name": "Request Updated",
+                  "value": "Request Updated"
+                },
+                {
+                  "name": "Onboarding Email Sent",
+                  "value": "Onboarding Email Sent"
+                },
+                {
+                  "name": "Task Assigned",
+                  "value": "Task Assigned"
+                },
+                {
+                  "name": "Error Occurred",
+                  "value": "Error Occurred"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Details",
+              "displayName": "Details",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Timestamp",
+              "displayName": "Timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        2256,
+        528
+      ],
+      "id": "ee5a7e92-c2fe-481c-822c-a841ae7ef6d6",
+      "name": "Update log activity",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "ufMGFfHN4FQmo5LF",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "workspace": "1217172808415169",
+        "name": "={{ $('Split Out client service to create subfolder').item.json.services == 'Design' ? 'Create initial mood board / concept direction' : 'Set up project environment / staging site' }}\n",
+        "otherProperties": {
+          "assignee": "={{ $json.Email }}",
+          "projects": "={{ $('Create a project').item.json.gid }}"
+        }
+      },
+      "type": "n8n-nodes-base.asana",
+      "typeVersion": 1,
+      "position": [
+        2976,
+        528
+      ],
+      "id": "44e126b8-2b57-4df7-92da-9de9f2c7da30",
+      "name": "Create a task1",
+      "retryOnFail": true,
+      "credentials": {
+        "asanaOAuth2Api": {
+          "id": "oVo38pGgPmEDt2XR",
+          "name": "Asana account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "appaWvyZoO9HZgCF7",
+          "mode": "list",
+          "cachedResultName": "Agency Client Onboarding System",
+          "cachedResultUrl": "https://airtable.com/appaWvyZoO9HZgCF7"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tbl4RJtgb9nYuugfD",
+          "mode": "list",
+          "cachedResultName": "Activity log",
+          "cachedResultUrl": "https://airtable.com/appaWvyZoO9HZgCF7/tbl4RJtgb9nYuugfD"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Client": "={{ [$('Search records').first().json.id] }}",
+            "Activity Type": "Task Assigned",
+            "Details": "={{ $('Pick the least busy designer/dev').item.json.Role }} assigned: {{ $('Pick the least busy designer/dev').item.json.Name }}",
+            "Timestamp": "={{ $now }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "ID",
+              "displayName": "ID",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Client",
+              "displayName": "Client",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Activity Type",
+              "displayName": "Activity Type",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "New Lead Created",
+                  "value": "New Lead Created"
+                },
+                {
+                  "name": "Booking Confirmed",
+                  "value": "Booking Confirmed"
+                },
+                {
+                  "name": "Project Created",
+                  "value": "Project Created"
+                },
+                {
+                  "name": "Folder Created",
+                  "value": "Folder Created"
+                },
+                {
+                  "name": "New Engagement Started",
+                  "value": "New Engagement Started"
+                },
+                {
+                  "name": "Request Updated",
+                  "value": "Request Updated"
+                },
+                {
+                  "name": "Onboarding Email Sent",
+                  "value": "Onboarding Email Sent"
+                },
+                {
+                  "name": "Task Assigned",
+                  "value": "Task Assigned"
+                },
+                {
+                  "name": "Error Occurred",
+                  "value": "Error Occurred"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Details",
+              "displayName": "Details",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Timestamp",
+              "displayName": "Timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        3296,
+        528
+      ],
+      "id": "80bb4acb-8471-458f-b5f5-ebc7fb5f6fff",
+      "name": "Update log activity1",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "ufMGFfHN4FQmo5LF",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "//**Code node — pick the least busy person\n\nconst team = $input.all().map(item => item.json.fields);\nconst chosen = team.reduce((lowest, current) => \n  current['Active Projects'] < lowest['Active Projects'] ? current : lowest\n);\nreturn [{ json: chosen }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2832,
+        528
+      ],
+      "id": "456bcc2d-a37c-4695-90fa-a481b28afadd",
+      "name": "Pick the least busy designer/dev"
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "appaWvyZoO9HZgCF7",
+          "mode": "list",
+          "cachedResultName": "Agency Client Onboarding System",
+          "cachedResultUrl": "https://airtable.com/appaWvyZoO9HZgCF7"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblFNlUvnJ8LVRiv3",
+          "mode": "list",
+          "cachedResultName": "Team DB",
+          "cachedResultUrl": "https://airtable.com/appaWvyZoO9HZgCF7/tblFNlUvnJ8LVRiv3"
+        },
+        "filterByFormula": "={Role} = \"{{ $('Split Out client service to create subfolder').item.json.services == 'Design' ? 'Designer' : 'Developer' }}\"",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        2656,
+        528
+      ],
+      "id": "743f236a-6f56-42c8-88ca-75ce6627cb3c",
+      "name": "Search records for designer/dev",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "ufMGFfHN4FQmo5LF",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "value": "appaWvyZoO9HZgCF7",
+          "mode": "list",
+          "cachedResultName": "Agency Client Onboarding System",
+          "cachedResultUrl": "https://airtable.com/appaWvyZoO9HZgCF7"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblFNlUvnJ8LVRiv3",
+          "mode": "list",
+          "cachedResultName": "Team DB",
+          "cachedResultUrl": "https://airtable.com/appaWvyZoO9HZgCF7/tblFNlUvnJ8LVRiv3"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Email": "={{ $('Pick the least busy designer/dev').item.json.Email }}",
+            "Active Projects": "={{ $('Pick the least busy designer/dev').item.json['Active Projects'] + 1 }}"
+          },
+          "matchingColumns": [
+            "Email"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Role",
+              "displayName": "Role",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Account Manager",
+                  "value": "Account Manager"
+                },
+                {
+                  "name": "Designer",
+                  "value": "Designer"
+                },
+                {
+                  "name": "Developer",
+                  "value": "Developer"
+                }
+              ],
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Active Projects",
+              "displayName": "Active Projects",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        3136,
+        528
+      ],
+      "id": "76562065-e7da-479d-aedb-9db2855eded3",
+      "name": "Increase activity of designer/dev + 1",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "ufMGFfHN4FQmo5LF",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "appaWvyZoO9HZgCF7",
+          "mode": "list",
+          "cachedResultName": "Agency Client Onboarding System",
+          "cachedResultUrl": "https://airtable.com/appaWvyZoO9HZgCF7"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tbl4RJtgb9nYuugfD",
+          "mode": "list",
+          "cachedResultName": "Activity log",
+          "cachedResultUrl": "https://airtable.com/appaWvyZoO9HZgCF7/tbl4RJtgb9nYuugfD"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Client": "={{ [$('Search records').first().json.id] }}",
+            "Activity Type": "Booking Confirmed",
+            "Details": "Booking already carried out by client",
+            "Timestamp": "={{ $now }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "ID",
+              "displayName": "ID",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Client",
+              "displayName": "Client",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Activity Type",
+              "displayName": "Activity Type",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "New Lead Created",
+                  "value": "New Lead Created"
+                },
+                {
+                  "name": "Booking Confirmed",
+                  "value": "Booking Confirmed"
+                },
+                {
+                  "name": "Project Created",
+                  "value": "Project Created"
+                },
+                {
+                  "name": "Folder Created",
+                  "value": "Folder Created"
+                },
+                {
+                  "name": "New Engagement Started",
+                  "value": "New Engagement Started"
+                },
+                {
+                  "name": "Request Updated",
+                  "value": "Request Updated"
+                },
+                {
+                  "name": "Onboarding Email Sent",
+                  "value": "Onboarding Email Sent"
+                },
+                {
+                  "name": "Task Assigned",
+                  "value": "Task Assigned"
+                },
+                {
+                  "name": "Error Occurred",
+                  "value": "Error Occurred"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Details",
+              "displayName": "Details",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Timestamp",
+              "displayName": "Timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        1360,
+        -128
+      ],
+      "id": "cae6e025-1ebf-4918-be67-02611c163549",
+      "name": "Log activity in logs",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "ufMGFfHN4FQmo5LF",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "appaWvyZoO9HZgCF7",
+          "mode": "list",
+          "cachedResultName": "Agency Client Onboarding System",
+          "cachedResultUrl": "https://airtable.com/appaWvyZoO9HZgCF7"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tbl4RJtgb9nYuugfD",
+          "mode": "list",
+          "cachedResultName": "Activity log",
+          "cachedResultUrl": "https://airtable.com/appaWvyZoO9HZgCF7/tbl4RJtgb9nYuugfD"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Client": "={{ [$('Search records').first().json.id] }}",
+            "Activity Type": "Onboarding Email Sent",
+            "Details": "Onboarding email sent to client",
+            "Timestamp": "={{ $now }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "ID",
+              "displayName": "ID",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Client",
+              "displayName": "Client",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Activity Type",
+              "displayName": "Activity Type",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "New Lead Created",
+                  "value": "New Lead Created"
+                },
+                {
+                  "name": "Booking Confirmed",
+                  "value": "Booking Confirmed"
+                },
+                {
+                  "name": "Project Created",
+                  "value": "Project Created"
+                },
+                {
+                  "name": "Folder Created",
+                  "value": "Folder Created"
+                },
+                {
+                  "name": "New Engagement Started",
+                  "value": "New Engagement Started"
+                },
+                {
+                  "name": "Request Updated",
+                  "value": "Request Updated"
+                },
+                {
+                  "name": "Onboarding Email Sent",
+                  "value": "Onboarding Email Sent"
+                },
+                {
+                  "name": "Task Assigned",
+                  "value": "Task Assigned"
+                },
+                {
+                  "name": "Error Occurred",
+                  "value": "Error Occurred"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Details",
+              "displayName": "Details",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Timestamp",
+              "displayName": "Timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        2944,
+        -80
+      ],
+      "id": "81269fbe-6469-47f5-a0e2-2d4cfe83152c",
+      "name": "Log activity in logs1",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "ufMGFfHN4FQmo5LF",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "Workflow 2: Client Booked → Onboarding Chain\n\nPurpose: Fires when a client books their kickoff call, sets up everything needed to start their engagement, project, folders, team assignment, and confirmation, then marks onboarding complete.\n\nLogic:\n\nCal.com webhook fires on booking\nFinds matching client record (by email + Status = \"New Lead,\" to correctly target the right engagement if a client has multiple)\nUpdates Status → \"Booked,\" logs Booking Date/Time\nCreates Asana project, stores project ID back in Airtable\n\nAccount Manager (always assigned, once per client):\n→ Round-robin picks least-busy Account Manager, creates Asana task, logs activity\n\nClient Drive folder:\n→ Reuses existing folder if client has one (returning client), otherwise creates fresh\n\nPer-service loop (Design and/or Development, based on client's selection):\n→ Loop processes one service at a time to avoid item-matching ambiguity\n→ For each: finds or creates the persistent service folder (e.g. \"Design\"), creates a unique \"- [Asana ID]\" subfolder for this specific engagement, assigns the relevant team member (Designer/Developer) via round-robin, logs activity\n\nOnce all services processed: sends final onboarding email, then updates Status → \"Onboarded\"\n\nResilience: key external API nodes (Asana, Google Drive, Gmail) have Retry On Fail enabled to recover from brief hiccups automatically. Any unrecoverable failure triggers Workflow 3 (Error Handler) via Slack.\n\nKnown limitation: if a client somehow has two simultaneous unbooked engagements, the email+status match could update the wrong one. Production fix would pass a unique record ID through the booking link.\n\nDepends on: Airtable (Clients, Team, Activity Log), Asana, Google Drive, Cal.com webhook, Gmail, Slack",
+        "height": 624,
+        "width": 912
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        560,
+        480
+      ],
+      "typeVersion": 1,
+      "id": "c323cd11-6474-4f1c-a937-26ea1282fd70",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "Assigns account manager to client",
+        "height": 304,
+        "width": 976,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1520,
+        432
+      ],
+      "typeVersion": 1,
+      "id": "30421408-839d-4e6a-b322-e366c5c8311e",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "Assigns developer/designer to client",
+        "height": 304,
+        "width": 976,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        2560,
+        432
+      ],
+      "typeVersion": 1,
+      "id": "1861165d-d1d5-45ca-8e56-1c919f88b3af",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "",
+        "height": 624,
+        "width": 3024,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        736,
+        -240
+      ],
+      "typeVersion": 1,
+      "id": "a92684b3-2625-4323-8476-86910f671fd0",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "value": "appaWvyZoO9HZgCF7",
+          "mode": "list",
+          "cachedResultName": "Agency Client Onboarding System",
+          "cachedResultUrl": "https://airtable.com/appaWvyZoO9HZgCF7"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblQH9ubfXvtt3Td3",
+          "mode": "list",
+          "cachedResultName": "Client DB",
+          "cachedResultUrl": "https://airtable.com/appaWvyZoO9HZgCF7/tblQH9ubfXvtt3Td3"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $json.id }}",
+            "Status": "Booked",
+            "Booking Date/Time": "={{ $('Webhook').item.json.body.payload.startTime }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true
+            },
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Phone",
+              "displayName": "Phone",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Services Requested",
+              "displayName": "Services Requested",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "options": [
+                {
+                  "name": "Design",
+                  "value": "Design"
+                },
+                {
+                  "name": "Development",
+                  "value": "Development"
+                }
+              ],
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "New Lead",
+                  "value": "New Lead"
+                },
+                {
+                  "name": "Booked",
+                  "value": "Booked"
+                },
+                {
+                  "name": "Onboarded",
+                  "value": "Onboarded"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Date Captured",
+              "displayName": "Date Captured",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Booking Date/Time",
+              "displayName": "Booking Date/Time",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Asana Project ID",
+              "displayName": "Asana Project ID",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Drive Folder ID",
+              "displayName": "Drive Folder ID",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Activity log",
+              "displayName": "Activity log",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        1152,
+        -128
+      ],
+      "id": "bfbda149-4afd-49be-85e8-9a5487a76be0",
+      "name": "Update status as booked",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "ufMGFfHN4FQmo5LF",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "value": "appaWvyZoO9HZgCF7",
+          "mode": "list",
+          "cachedResultName": "Agency Client Onboarding System",
+          "cachedResultUrl": "https://airtable.com/appaWvyZoO9HZgCF7"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblQH9ubfXvtt3Td3",
+          "mode": "list",
+          "cachedResultName": "Client DB",
+          "cachedResultUrl": "https://airtable.com/appaWvyZoO9HZgCF7/tblQH9ubfXvtt3Td3"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $json.id }}",
+            "Status": "Onboarded"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true
+            },
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Phone",
+              "displayName": "Phone",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Services Requested",
+              "displayName": "Services Requested",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "options": [
+                {
+                  "name": "Design",
+                  "value": "Design"
+                },
+                {
+                  "name": "Development",
+                  "value": "Development"
+                }
+              ],
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "New Lead",
+                  "value": "New Lead"
+                },
+                {
+                  "name": "Booked",
+                  "value": "Booked"
+                },
+                {
+                  "name": "Onboarded",
+                  "value": "Onboarded"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Date Captured",
+              "displayName": "Date Captured",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Booking Date/Time",
+              "displayName": "Booking Date/Time",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Asana Project ID",
+              "displayName": "Asana Project ID",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Drive Folder ID",
+              "displayName": "Drive Folder ID",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Activity log",
+              "displayName": "Activity log",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        2768,
+        -80
+      ],
+      "id": "749c5121-ee23-49c2-b586-756728e774b5",
+      "name": "Update status as booked1",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "ufMGFfHN4FQmo5LF",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    }
+  ],
+  "pinData": {
+    "Webhook": [
+      {
+        "json": {
+          "headers": {
+            "host": "najiyyah-nocode.app.n8n.cloud",
+            "user-agent": "node",
+            "content-length": "2972",
+            "accept": "*/*",
+            "accept-encoding": "gzip, br",
+            "accept-language": "*",
+            "cdn-loop": "cloudflare; loops=1; subreqs=1",
+            "cf-connecting-ip": "5.60.65.82",
+            "cf-ew-via": "15",
+            "cf-ipcountry": "US",
+            "cf-ray": "a281e42e3ac6d653-IAD",
+            "cf-visitor": "{\"scheme\":\"https\"}",
+            "cf-worker": "n8n.cloud",
+            "content-type": "application/json",
+            "sec-fetch-mode": "cors",
+            "x-cal-signature-256": "no-secret-provided",
+            "x-cal-webhook-version": "2021-10-20",
+            "x-forwarded-for": "5.60.65.82, 172.70.34.114",
+            "x-forwarded-host": "najiyyah-nocode.app.n8n.cloud",
+            "x-forwarded-port": "443",
+            "x-forwarded-proto": "https",
+            "x-forwarded-server": "traefik-prod-users-swc-12-59b6985f69-hzmxb",
+            "x-is-trusted": "yes",
+            "x-real-ip": "5.60.65.82"
+          },
+          "params": {},
+          "query": {},
+          "body": {
+            "triggerEvent": "BOOKING_CREATED",
+            "createdAt": "2026-08-08T22:17:27.118Z",
+            "payload": {
+              "bookerUrl": "https://cal.com",
+              "title": "Webdesign Agency Booking between Najiyyah AbdurRahman and Jennifer ",
+              "startTime": "2026-08-11T15:00:00.000Z",
+              "endTime": "2026-08-11T15:30:00.000Z",
+              "additionalNotes": "",
+              "type": "secret",
+              "eventTypeTitle": "Webdesign Agency Booking",
+              "description": "",
+              "eventTypeId": 6533227,
+              "hideCalendarNotes": false,
+              "hideCalendarEventDetails": false,
+              "privateNoteEnabled": false,
+              "privateNoteMode": null,
+              "privateNoteTemplate": null,
+              "hideOrganizerEmail": false,
+              "schedulingType": null,
+              "seatsPerTimeSlot": null,
+              "seatsShowAttendees": true,
+              "seatsShowAvailabilityCount": true,
+              "customReplyToEmail": null,
+              "disableRescheduling": false,
+              "disableReschedulingScope": "HOST_AND_ATTENDEE",
+              "disableCancelling": false,
+              "disableCancellingScope": "HOST_AND_ATTENDEE",
+              "organizer": {
+                "id": 3069569,
+                "name": "Najiyyah AbdurRahman",
+                "email": "aderinsola1137@gmail.com",
+                "username": "najiyyah-abdurrahman-0k0os0",
+                "timeZone": "Africa/Lagos",
+                "language": {
+                  "locale": "en"
+                },
+                "timeFormat": "h:mma",
+                "utcOffset": 60
+              },
+              "attendees": [
+                {
+                  "name": "Jennifer ",
+                  "email": "najiyyahfreelancing@gmail.com",
+                  "timeZone": "Africa/Lagos",
+                  "language": {
+                    "locale": "en"
+                  },
+                  "phoneNumber": null,
+                  "bookingSeat": null,
+                  "utcOffset": 60,
+                  "firstName": "Jennifer",
+                  "lastName": ""
+                }
+              ],
+              "customInputs": {},
+              "responses": {
+                "name": {
+                  "label": "your_name",
+                  "value": "Jennifer "
+                },
+                "email": {
+                  "label": "email_address",
+                  "value": "najiyyahfreelancing@gmail.com"
+                },
+                "guests": {
+                  "label": "guests",
+                  "value": []
+                },
+                "location": {
+                  "label": "location",
+                  "value": {
+                    "value": "integrations:daily",
+                    "optionValue": ""
+                  }
+                }
+              },
+              "userFieldsResponses": {},
+              "location": "integrations:daily",
+              "iCalUID": "fVPzjG7uNuUkQt6g4ohRid@Cal.com",
+              "iCalSequence": 0,
+              "requiresConfirmation": false,
+              "oneTimePassword": null,
+              "platformClientId": "",
+              "platformRescheduleUrl": "",
+              "platformCancelUrl": "",
+              "platformBookingUrl": "",
+              "uid": "fVPzjG7uNuUkQt6g4ohRid",
+              "organizationId": null,
+              "hashedLink": null,
+              "cancellationReason": null,
+              "rejectionReason": null,
+              "hideBranding": false,
+              "videoCallData": {
+                "type": "daily_video",
+                "id": "CcInhvne2FOXxbREm99f",
+                "password": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyIjoiQ2NJbmh2bmUyRk9YeGJSRW05OWYiLCJleHAiOjE3ODcwNjcwMDAsIm8iOnRydWUsImVydWkiOmZhbHNlLCJkIjoiYmJkOThhNzEtMTljOS00YmIxLWE1YzUtY2FmMWVjNWJkMTA1IiwiaWF0IjoxNzg2MjI3NDQ1fQ.acbqCSn4edcQ6_l5f5-fQUDNn1AFJLtSOoNmR7yh6YI",
+                "url": "https://app.cal.com/video/fVPzjG7uNuUkQt6g4ohRid"
+              },
+              "appsStatus": [
+                {
+                  "appName": "Cal Video",
+                  "type": "daily_video",
+                  "success": 1,
+                  "failures": 0,
+                  "errors": []
+                },
+                {
+                  "appName": "Google Calendar",
+                  "type": "google_calendar",
+                  "success": 1,
+                  "failures": 0,
+                  "errors": []
+                }
+              ],
+              "destinationCalendar": [
+                {
+                  "id": 1483610,
+                  "integration": "google_calendar",
+                  "externalId": "aderinsola1137@gmail.com",
+                  "primaryEmail": "aderinsola1137@gmail.com",
+                  "userId": 3069569,
+                  "credentialId": 2397587
+                }
+              ],
+              "bookingId": 23557636,
+              "status": "ACCEPTED",
+              "eventTitle": "Webdesign Agency Booking",
+              "eventDescription": "",
+              "price": 0,
+              "currency": "usd",
+              "length": 30,
+              "assignmentReason": [],
+              "metadata": {
+                "videoCallUrl": "https://app.cal.com/video/fVPzjG7uNuUkQt6g4ohRid"
+              }
+            }
+          },
+          "webhookUrl": "https://najiyyah-nocode.app.n8n.cloud/webhook-test/1db415ac-36a5-479f-92ec-a211054d0b6c",
+          "executionMode": "test"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Search records",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search records": {
+      "main": [
+        [
+          {
+            "node": "Create a project",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Update status as booked",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a project": {
+      "main": [
+        [
+          {
+            "node": "Update Asana ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Asana ID": {
+      "main": [
+        [
+          {
+            "node": "If (google drive folder not exist)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Search records for account managers",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If (google drive folder not exist)": {
+      "main": [
+        [
+          {
+            "node": "Create folder for each client",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Prep existing client folder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create folder for each client": {
+      "main": [
+        [
+          {
+            "node": "Update folder ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update folder ID": {
+      "main": [
+        [
+          {
+            "node": "Prep new client folder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prep new client folder": {
+      "main": [
+        [
+          {
+            "node": "Split Out client service to create subfolder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out client service to create subfolder": {
+      "main": [
+        [
+          {
+            "node": "Loop over services",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search folders if subfolder already existed": {
+      "main": [
+        [
+          {
+            "node": "If it doesn't",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If it doesn't": {
+      "main": [
+        [
+          {
+            "node": "Create subfolder",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Set ID of subfolder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create subfolder": {
+      "main": [
+        [
+          {
+            "node": "Set ID of subfolder-",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set ID of subfolder-": {
+      "main": [
+        [
+          {
+            "node": "Create Asana project folder in subfolder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Asana project folder in subfolder": {
+      "main": [
+        [
+          {
+            "node": "Loop over services",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop over services": {
+      "main": [
+        [
+          {
+            "node": "Send a message to client",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Search folders if subfolder already existed",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Search records for designer/dev",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set ID of subfolder": {
+      "main": [
+        [
+          {
+            "node": "Create Asana project folder in subfolder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prep existing client folder": {
+      "main": [
+        [
+          {
+            "node": "Split Out client service to create subfolder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a task": {
+      "main": [
+        [
+          {
+            "node": "Increase activity of manager + 1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search records for account managers": {
+      "main": [
+        [
+          {
+            "node": "Pick the least busy manager",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pick the least busy manager": {
+      "main": [
+        [
+          {
+            "node": "Create a task",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Increase activity of manager + 1": {
+      "main": [
+        [
+          {
+            "node": "Update log activity",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a task1": {
+      "main": [
+        [
+          {
+            "node": "Increase activity of designer/dev + 1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pick the least busy designer/dev": {
+      "main": [
+        [
+          {
+            "node": "Create a task1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search records for designer/dev": {
+      "main": [
+        [
+          {
+            "node": "Pick the least busy designer/dev",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Increase activity of designer/dev + 1": {
+      "main": [
+        [
+          {
+            "node": "Update log activity1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message to client": {
+      "main": [
+        [
+          {
+            "node": "Update status as booked1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update status as booked": {
+      "main": [
+        [
+          {
+            "node": "Log activity in logs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update status as booked1": {
+      "main": [
+        [
+          {
+            "node": "Log activity in logs1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "errorWorkflow": "G3t2ujQt0gf7lcHt",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "versionId": "cdf0d0e8-41b0-4f47-a605-06beef890441",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "7eb6cf524fb5b51c7b72dfa3da97b99d7663e651399b76f9b39374c75cdae20e"
+  },
+  "nodeGroups": [],
+  "id": "qXjkdBRGgLWcQEQi",
+  "tags": []
+}
