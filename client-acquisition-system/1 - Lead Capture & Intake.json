@@ -1,0 +1,1037 @@
+{
+  "name": "1 - Lead Capture & Intake",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Book Your Free Discovery Call",
+        "formDescription": "Tell us a bit about yourself and we'll be in touch to schedule your free discovery call",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Name",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Email",
+              "fieldType": "email",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Phone Number",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.6,
+      "position": [
+        0,
+        0
+      ],
+      "id": "ac8082c6-9029-4c75-a929-e90cc2e8ea5d",
+      "name": "On form submission",
+      "webhookId": "73b6d1d0-3979-4293-bd42-bbb4b1fb8071"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "9e5d8cba-8328-4140-b234-1b13ccaaec08",
+              "leftValue": "={{ $json.id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        448,
+        0
+      ],
+      "id": "f936e110-d983-4788-913b-0f4f6aa16be4",
+      "name": "If",
+      "notesInFlow": false
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "appAbAcfIXtdCSg2a",
+          "mode": "list",
+          "cachedResultName": "Client Acquisition CRM",
+          "cachedResultUrl": "https://airtable.com/appAbAcfIXtdCSg2a"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblvAazib72jU5T07",
+          "mode": "list",
+          "cachedResultName": "Imported table",
+          "cachedResultUrl": "https://airtable.com/appAbAcfIXtdCSg2a/tblvAazib72jU5T07"
+        },
+        "filterByFormula": "={Email} = \"{{ $json.Email }}\"",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        224,
+        0
+      ],
+      "id": "e72ca79b-e432-43a1-9b66-3c8cb4d613b1",
+      "name": "Search if lead previosly exists",
+      "alwaysOutputData": true,
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "ufMGFfHN4FQmo5LF",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "value": "appAbAcfIXtdCSg2a",
+          "mode": "list",
+          "cachedResultName": "Client Acquisition CRM",
+          "cachedResultUrl": "https://airtable.com/appAbAcfIXtdCSg2a"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblvAazib72jU5T07",
+          "mode": "list",
+          "cachedResultName": "Imported table",
+          "cachedResultUrl": "https://airtable.com/appAbAcfIXtdCSg2a/tblvAazib72jU5T07"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Email": "={{ $json.fields.Email }}",
+            "Phone": "={{ $('On form submission').item.json['Phone Number'] }}",
+            "Name": "={{ $('On form submission').item.json.Name }}",
+            "Follow-Up Count": 0
+          },
+          "matchingColumns": [
+            "Email"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": false
+            },
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Phone",
+              "displayName": "Phone",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "New Lead",
+                  "value": "New Lead"
+                },
+                {
+                  "name": "Contacted",
+                  "value": "Contacted"
+                },
+                {
+                  "name": "Booked",
+                  "value": "Booked"
+                },
+                {
+                  "name": "Closed",
+                  "value": "Closed"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Date Captured",
+              "displayName": "Date Captured",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Booking Date/Time",
+              "displayName": "Booking Date/Time",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Follow-Up Count",
+              "displayName": "Follow-Up Count",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Last Contacted",
+              "displayName": "Last Contacted",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Notes",
+              "displayName": "Notes",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Table 2",
+              "displayName": "Table 2",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        672,
+        -96
+      ],
+      "id": "a3ad90ec-cda7-4348-b8c4-753695a996f7",
+      "name": "updates record if lead exists",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "ufMGFfHN4FQmo5LF",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "appAbAcfIXtdCSg2a",
+          "mode": "list",
+          "cachedResultName": "Client Acquisition CRM",
+          "cachedResultUrl": "https://airtable.com/appAbAcfIXtdCSg2a"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblvAazib72jU5T07",
+          "mode": "list",
+          "cachedResultName": "Imported table",
+          "cachedResultUrl": "https://airtable.com/appAbAcfIXtdCSg2a/tblvAazib72jU5T07"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Name": "={{ $('On form submission').item.json.Name }}",
+            "Email": "={{ $('On form submission').item.json.Email }}",
+            "Phone": "={{ $('On form submission').item.json['Phone Number'] }}",
+            "Status": "New Lead",
+            "Date Captured": "={{ $now }}",
+            "Follow-Up Count": 0
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Phone",
+              "displayName": "Phone",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "New Lead",
+                  "value": "New Lead"
+                },
+                {
+                  "name": "Contacted",
+                  "value": "Contacted"
+                },
+                {
+                  "name": "Booked",
+                  "value": "Booked"
+                },
+                {
+                  "name": "Closed",
+                  "value": "Closed"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Date Captured",
+              "displayName": "Date Captured",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Booking Date/Time",
+              "displayName": "Booking Date/Time",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Follow-Up Count",
+              "displayName": "Follow-Up Count",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Last Contacted",
+              "displayName": "Last Contacted",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Notes",
+              "displayName": "Notes",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Table 2",
+              "displayName": "Table 2",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        672,
+        96
+      ],
+      "id": "7ca17e47-519b-4646-8d94-a216db65bfee",
+      "name": "Creates new lead",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "ufMGFfHN4FQmo5LF",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "appAbAcfIXtdCSg2a",
+          "mode": "list",
+          "cachedResultName": "Client Acquisition CRM",
+          "cachedResultUrl": "https://airtable.com/appAbAcfIXtdCSg2a"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblzY0Q8cfr26K3fE",
+          "mode": "list",
+          "cachedResultName": "Activity Log",
+          "cachedResultUrl": "https://airtable.com/appAbAcfIXtdCSg2a/tblzY0Q8cfr26K3fE"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Lead email": "={{ [$json.id] }}",
+            "Activity Type": "Form Resubmitted",
+            "Details": "Existing lead updated info via form",
+            "Timestamp": "={{ $now }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Column",
+              "displayName": "Column",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Lead email",
+              "displayName": "Lead email",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Activity Type",
+              "displayName": "Activity Type",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Form Submitted",
+                  "value": "Form Submitted"
+                },
+                {
+                  "name": "Follow-Up Sent",
+                  "value": "Follow-Up Sent"
+                },
+                {
+                  "name": "Status Changed",
+                  "value": "Status Changed"
+                },
+                {
+                  "name": "Booking Confirmed",
+                  "value": "Booking Confirmed"
+                },
+                {
+                  "name": "Note Added",
+                  "value": "Note Added"
+                },
+                {
+                  "name": "Form Resubmitted",
+                  "value": "Form Resubmitted"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Details",
+              "displayName": "Details",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Timestamp",
+              "displayName": "Timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        896,
+        -96
+      ],
+      "id": "e649b216-28b2-4d21-8e09-ebeadca9d88d",
+      "name": "Logs activity",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "ufMGFfHN4FQmo5LF",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "appAbAcfIXtdCSg2a",
+          "mode": "list",
+          "cachedResultName": "Client Acquisition CRM",
+          "cachedResultUrl": "https://airtable.com/appAbAcfIXtdCSg2a"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblzY0Q8cfr26K3fE",
+          "mode": "list",
+          "cachedResultName": "Activity Log",
+          "cachedResultUrl": "https://airtable.com/appAbAcfIXtdCSg2a/tblzY0Q8cfr26K3fE"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Activity Type": "Form Submitted",
+            "Details": "New form submission received",
+            "Timestamp": "={{ $now }}",
+            "Lead email": "={{ [$json.id] }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Column",
+              "displayName": "Column",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Lead email",
+              "displayName": "Lead email",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Activity Type",
+              "displayName": "Activity Type",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Form Submitted",
+                  "value": "Form Submitted"
+                },
+                {
+                  "name": "Follow-Up Sent",
+                  "value": "Follow-Up Sent"
+                },
+                {
+                  "name": "Status Changed",
+                  "value": "Status Changed"
+                },
+                {
+                  "name": "Booking Confirmed",
+                  "value": "Booking Confirmed"
+                },
+                {
+                  "name": "Note Added",
+                  "value": "Note Added"
+                },
+                {
+                  "name": "Form Resubmitted",
+                  "value": "Form Resubmitted"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Details",
+              "displayName": "Details",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Timestamp",
+              "displayName": "Timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "typecast": false
+        }
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        896,
+        96
+      ],
+      "id": "af9eaac1-affe-4310-8935-151cc8d12e83",
+      "name": "Logs activity1",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "ufMGFfHN4FQmo5LF",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('On form submission').item.json.Email }}",
+        "subject": "You're on the list — next steps for your discovery call",
+        "emailType": "text",
+        "message": "=Hi {{ $('On form submission').item.json.Name }},\n\nThanks for reaching out! You can grab your free discovery call here: https://cal.com/najiyyah-abdurrahman-0k0os0/30min\n\nTalk soon,\nAderinsola",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1120,
+        96
+      ],
+      "id": "1060e4f4-9bb6-4c48-a7c9-63be9bd65b38",
+      "name": "Send welcome message",
+      "webhookId": "73fe1307-6ba8-4393-a85b-5ae28c8ce1cf",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "2E261wDqoizvgQEP",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('On form submission').item.json.Email }}",
+        "subject": "You're on the list already— next steps for your discovery call",
+        "emailType": "text",
+        "message": "=Hi {{ $('On form submission').item.json.Name }},\nThanks for the update — we've got your latest details on file. If you haven't booked your free discovery call yet, here's the link: https://cal.com/najiyyah-abdurrahman-0k0os0/30min. If you've already booked, we'll see you then!",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1120,
+        -96
+      ],
+      "id": "b7f2badc-1d5f-4468-a239-65963dceea64",
+      "name": "Send update message1",
+      "webhookId": "73fe1307-6ba8-4393-a85b-5ae28c8ce1cf",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "2E261wDqoizvgQEP",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "appAbAcfIXtdCSg2a",
+          "mode": "list",
+          "cachedResultName": "Client Acquisition CRM",
+          "cachedResultUrl": "https://airtable.com/appAbAcfIXtdCSg2a"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblzY0Q8cfr26K3fE",
+          "mode": "list",
+          "cachedResultName": "Activity Log",
+          "cachedResultUrl": "https://airtable.com/appAbAcfIXtdCSg2a/tblzY0Q8cfr26K3fE"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Lead email": "={{ [$('Creates new lead').item.json.id] }}",
+            "Activity Type": "Welcome email sent",
+            "Details": "Welcome email sent",
+            "Timestamp": "={{ $now }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Column",
+              "displayName": "Column",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Lead email",
+              "displayName": "Lead email",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Activity Type",
+              "displayName": "Activity Type",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Form Submitted",
+                  "value": "Form Submitted"
+                },
+                {
+                  "name": "Follow-Up Sent",
+                  "value": "Follow-Up Sent"
+                },
+                {
+                  "name": "Status Changed",
+                  "value": "Status Changed"
+                },
+                {
+                  "name": "Booking Confirmed",
+                  "value": "Booking Confirmed"
+                },
+                {
+                  "name": "Note Added",
+                  "value": "Note Added"
+                },
+                {
+                  "name": "Form Resubmitted",
+                  "value": "Form Resubmitted"
+                },
+                {
+                  "name": "Welcome email sent",
+                  "value": "Welcome email sent"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Details",
+              "displayName": "Details",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Timestamp",
+              "displayName": "Timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        1296,
+        96
+      ],
+      "id": "fbb79fe4-39af-495c-b37b-655b2988336b",
+      "name": "Logs activity2",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "ufMGFfHN4FQmo5LF",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Search if lead previosly exists",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "updates record if lead exists",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Creates new lead",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search if lead previosly exists": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "updates record if lead exists": {
+      "main": [
+        [
+          {
+            "node": "Logs activity",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Creates new lead": {
+      "main": [
+        [
+          {
+            "node": "Logs activity1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Logs activity": {
+      "main": [
+        [
+          {
+            "node": "Send update message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Logs activity1": {
+      "main": [
+        [
+          {
+            "node": "Send welcome message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send update message1": {
+      "main": [
+        []
+      ]
+    },
+    "Send welcome message": {
+      "main": [
+        [
+          {
+            "node": "Logs activity2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "03cf4e89-a04a-4a86-8d25-f3bba3d647a1",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "7eb6cf524fb5b51c7b72dfa3da97b99d7663e651399b76f9b39374c75cdae20e"
+  },
+  "nodeGroups": [],
+  "id": "DilNMUajV2ZIm7oh",
+  "tags": []
+}
