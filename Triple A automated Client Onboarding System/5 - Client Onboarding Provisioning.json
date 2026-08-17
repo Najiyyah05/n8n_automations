@@ -1,0 +1,1365 @@
+{
+  "name": "5 - Client Onboarding Provisioning",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "authentication": "airtableTokenApi",
+        "baseId": {
+          "__rl": true,
+          "value": "appVmRT9oz1rmIOE1",
+          "mode": "id"
+        },
+        "tableId": {
+          "__rl": true,
+          "value": "tblhy3W4OLpHKG7j5",
+          "mode": "id"
+        },
+        "triggerField": " Submitted At",
+        "additionalFields": {
+          "viewId": "viwb8chBFkuOZpMHf"
+        }
+      },
+      "id": "4a72e5b4-f0cf-4ae9-b5cd-a9e39834a8b3",
+      "name": "New Intake Record1",
+      "type": "n8n-nodes-base.airtableTrigger",
+      "typeVersion": 1,
+      "position": [
+        32,
+        384
+      ],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "oY7iME868Dyd39Xs",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "appVmRT9oz1rmIOE1",
+          "mode": "list",
+          "cachedResultName": "Agency full onboarding system 2",
+          "cachedResultUrl": "https://airtable.com/appVmRT9oz1rmIOE1"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblmdtGslOCGizfSs",
+          "mode": "list",
+          "cachedResultName": "Onboarding",
+          "cachedResultUrl": "https://airtable.com/appVmRT9oz1rmIOE1/tblmdtGslOCGizfSs"
+        },
+        "filterByFormula": "=RECORD_ID() = \"{{ $json.fields['Onboarding Record ID'] }}\"",
+        "returnAll": false,
+        "limit": 1,
+        "options": {}
+      },
+      "id": "ecbbdca5-12b8-4aa4-8c38-34809c3fd18f",
+      "name": "Search Onboarding",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        240,
+        384
+      ],
+      "alwaysOutputData": true,
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "oY7iME868Dyd39Xs",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "has-id",
+              "leftValue": "={{ $json.id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "7c73085f-f28b-46e7-9022-5182a72f19e9",
+      "name": "Match Found?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        448,
+        384
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "mode": "id",
+          "value": "appVmRT9oz1rmIOE1"
+        },
+        "table": {
+          "__rl": true,
+          "mode": "id",
+          "value": "tblmdtGslOCGizfSs"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $('Search Onboarding').item.json.id }}",
+            "Status": "Intake Received"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "type": "string",
+              "required": false,
+              "display": true,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "type": "string",
+              "required": false,
+              "display": true
+            }
+          ]
+        },
+        "options": {
+          "typecast": true
+        }
+      },
+      "id": "2118b737-b715-41ea-a9de-2784b09177a0",
+      "name": "Status: Intake Received",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        672,
+        288
+      ],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "oY7iME868Dyd39Xs",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "mode": "id",
+          "value": "appVmRT9oz1rmIOE1"
+        },
+        "table": {
+          "__rl": true,
+          "mode": "id",
+          "value": "tblGEXkPtvvMoDNIY"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Client": "={{ [$('Search Onboarding').item.json.id] }}",
+            "Event": "Intake Received",
+            "Note": "=Intake data received and linked to Onboarding record at {{ $now.toISO() }}"
+          },
+          "schema": [
+            {
+              "id": "Client",
+              "displayName": "Client",
+              "type": "array",
+              "required": false,
+              "display": true
+            },
+            {
+              "id": "Event",
+              "displayName": "Event",
+              "type": "string",
+              "required": false,
+              "display": true
+            },
+            {
+              "id": "Note",
+              "displayName": "Note",
+              "type": "string",
+              "required": false,
+              "display": true
+            }
+          ]
+        },
+        "options": {
+          "typecast": true
+        }
+      },
+      "id": "4503ddc0-83e9-43e0-a1b1-25be8044bac6",
+      "name": "Log: Intake Received",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        896,
+        288
+      ],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "oY7iME868Dyd39Xs",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "mode": "id",
+          "value": "appVmRT9oz1rmIOE1"
+        },
+        "table": {
+          "__rl": true,
+          "mode": "id",
+          "value": "tblmdtGslOCGizfSs"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $('Search Onboarding').item.json.id }}",
+            "Status": "Provisioning"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "type": "string",
+              "required": false,
+              "display": true,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "type": "string",
+              "required": false,
+              "display": true
+            }
+          ]
+        },
+        "options": {
+          "typecast": true
+        }
+      },
+      "id": "44806907-d3fa-479d-af65-9a6173f48dcf",
+      "name": "Status: Provisioning",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        1120,
+        288
+      ],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "oY7iME868Dyd39Xs",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "folder",
+        "name": "={{ $('Search Onboarding').item.json.fields['Client Name'] }}",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive",
+          "cachedResultName": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "1_Fcc4DQ0rhupnuu4zP2g6N2qwuIjeTHu",
+          "mode": "list",
+          "cachedResultName": "Triple AI automation Client (assessment)",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1_Fcc4DQ0rhupnuu4zP2g6N2qwuIjeTHu"
+        },
+        "options": {}
+      },
+      "id": "e10ecad1-2e31-486e-9ce6-ad4b2229ac67",
+      "name": "Create Drive Folder",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1344,
+        288
+      ],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "EnW4ZXLCujmLnRfo",
+          "name": "Google Drive account"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "resource": "project",
+        "operation": "create",
+        "name": "={{ $('Search Onboarding').item.json.fields['Client Name'] }}",
+        "workspace": "=1217172808415169",
+        "team": "1217172808415171",
+        "additionalFields": {}
+      },
+      "id": "94c79691-e659-4be4-859d-9a0a7869562e",
+      "name": "Create Asana Project",
+      "type": "n8n-nodes-base.asana",
+      "typeVersion": 1,
+      "position": [
+        1568,
+        192
+      ],
+      "credentials": {
+        "asanaApi": {
+          "id": "CAsTHirYn1QqDmA4",
+          "name": "Asana account"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "resource": "channel",
+        "channelId": "=client5-{{ ($('Search Onboarding').item.json.fields['Client Name'] || '').toString().toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'') }}"
+      },
+      "id": "816740f8-bb3b-4fdb-989c-5747d0d2278d",
+      "name": "Create Slack Channel",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.7,
+      "position": [
+        1792,
+        96
+      ],
+      "webhookId": "255c21a4-89f9-48e7-91b1-e6c2ba9aca1d",
+      "credentials": {
+        "slackApi": {
+          "id": "GeeqlF42tZ9iJLdB",
+          "name": "Slack account 2"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "resource": "channel",
+        "operation": "invite",
+        "channelId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $('Create Slack Channel').item.json.id }}"
+        },
+        "userIds": [
+          "U0BP63HME5A"
+        ]
+      },
+      "id": "8f90b7bf-7eee-4126-9118-0ede6cf5ea08",
+      "name": "Invite to Channel",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.7,
+      "position": [
+        1984,
+        0
+      ],
+      "webhookId": "68d184d0-b11b-437d-8c2d-d2eeb63d7a9f",
+      "credentials": {
+        "slackApi": {
+          "id": "GeeqlF42tZ9iJLdB",
+          "name": "Slack account 2"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "mode": "id",
+          "value": "appVmRT9oz1rmIOE1"
+        },
+        "table": {
+          "__rl": true,
+          "mode": "id",
+          "value": "tblmdtGslOCGizfSs"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "matchingColumns": [
+            "id"
+          ],
+          "value": {
+            "id": "={{ $('Search Onboarding').item.json.id }}",
+            "Status": "Provisioned"
+          },
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "type": "string",
+              "required": false,
+              "display": true,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "type": "string",
+              "required": false,
+              "display": true
+            }
+          ]
+        },
+        "options": {
+          "typecast": true
+        }
+      },
+      "id": "4cc6701b-2ae2-46ff-ad73-21a2115ee755",
+      "name": "Status: Provisioned",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        2224,
+        0
+      ],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "oY7iME868Dyd39Xs",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "mode": "id",
+          "value": "appVmRT9oz1rmIOE1"
+        },
+        "table": {
+          "__rl": true,
+          "mode": "id",
+          "value": "tblGEXkPtvvMoDNIY"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Client": "={{ [$('Search Onboarding').item.json.id] }}",
+            "Event": "Provisioning Complete",
+            "Note": "=All provisioning steps succeeded.\nDrive folder: https://drive.google.com/drive/folders/{{ $('Create Drive Folder').item.json.id }}\nAsana project: {{ $('Create Asana Project').item.json.permalink_url }}\nSlack channel: #{{ $('Create Slack Channel').item.json.name }}"
+          },
+          "schema": [
+            {
+              "id": "Client",
+              "displayName": "Client",
+              "type": "array",
+              "required": false,
+              "display": true
+            },
+            {
+              "id": "Event",
+              "displayName": "Event",
+              "type": "string",
+              "required": false,
+              "display": true
+            },
+            {
+              "id": "Note",
+              "displayName": "Note",
+              "type": "string",
+              "required": false,
+              "display": true
+            }
+          ]
+        },
+        "options": {
+          "typecast": true
+        }
+      },
+      "id": "57f84c3a-9495-4b7b-a9da-49f84b9e5672",
+      "name": "Log: Provisioning Complete",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        2464,
+        0
+      ],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "oY7iME868Dyd39Xs",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "mode": "id",
+          "value": "appVmRT9oz1rmIOE1"
+        },
+        "table": {
+          "__rl": true,
+          "mode": "id",
+          "value": "tblmdtGslOCGizfSs"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "matchingColumns": [
+            "id"
+          ],
+          "value": {
+            "id": "={{ $('Search Onboarding').item.json.id }}",
+            "Status": "Blocked – Drive Folder Creation Failed"
+          },
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "type": "string",
+              "required": false,
+              "display": true,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "type": "string",
+              "required": false,
+              "display": true
+            }
+          ]
+        },
+        "options": {
+          "typecast": true
+        }
+      },
+      "id": "be793378-143e-49be-a161-1a2625290d32",
+      "name": "Status: Blocked (Drive)",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        1568,
+        576
+      ],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "oY7iME868Dyd39Xs",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "mode": "id",
+          "value": "appVmRT9oz1rmIOE1"
+        },
+        "table": {
+          "__rl": true,
+          "mode": "id",
+          "value": "tblGEXkPtvvMoDNIY"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Client": "={{ [$('Search Onboarding').item.json.id] }}",
+            "Event": "Provisioning Failed – Drive Folder",
+            "Note": "=Google Drive folder creation FAILED: {{ $json.error?.message || $json.error || 'unknown error' }}"
+          },
+          "schema": [
+            {
+              "id": "Client",
+              "displayName": "Client",
+              "type": "array",
+              "required": false,
+              "display": true
+            },
+            {
+              "id": "Event",
+              "displayName": "Event",
+              "type": "string",
+              "required": false,
+              "display": true
+            },
+            {
+              "id": "Note",
+              "displayName": "Note",
+              "type": "string",
+              "required": false,
+              "display": true
+            }
+          ]
+        },
+        "options": {
+          "typecast": true
+        }
+      },
+      "id": "5cb6d476-1f5d-4d6f-bc43-3108a0d7a56c",
+      "name": "Log: Drive Failed",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        1792,
+        576
+      ],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "oY7iME868Dyd39Xs",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "#agency-onboarding-2",
+          "mode": "name"
+        },
+        "text": "=:x: Onboarding provisioning BLOCKED for {{ $('Search Onboarding').item.json.fields['Client Name'] }}.\nStep failed: Google Drive folder creation.\nError: {{ $json.error?.message || $json.error || 'unknown error' }}\nNo provisioning steps completed.",
+        "otherOptions": {}
+      },
+      "id": "a55ca773-8731-4685-88aa-0b8531c0b780",
+      "name": "Alert: Drive Failed",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.7,
+      "position": [
+        2016,
+        576
+      ],
+      "webhookId": "a2f89b95-5014-4355-b117-d2e9ec8b9ee4",
+      "credentials": {
+        "slackApi": {
+          "id": "GeeqlF42tZ9iJLdB",
+          "name": "Slack account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "mode": "id",
+          "value": "appVmRT9oz1rmIOE1"
+        },
+        "table": {
+          "__rl": true,
+          "mode": "id",
+          "value": "tblmdtGslOCGizfSs"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "matchingColumns": [
+            "id"
+          ],
+          "value": {
+            "id": "={{ $('Search Onboarding').item.json.id }}",
+            "Status": "Blocked – Asana Project Creation Failed"
+          },
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "type": "string",
+              "required": false,
+              "display": true,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "type": "string",
+              "required": false,
+              "display": true
+            }
+          ]
+        },
+        "options": {
+          "typecast": true
+        }
+      },
+      "id": "f8f6ac5a-74a2-4985-b7b3-4dd0c4671438",
+      "name": "Status: Blocked (Asana)",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        1792,
+        384
+      ],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "oY7iME868Dyd39Xs",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "mode": "id",
+          "value": "appVmRT9oz1rmIOE1"
+        },
+        "table": {
+          "__rl": true,
+          "mode": "id",
+          "value": "tblGEXkPtvvMoDNIY"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Client": "={{ [$('Search Onboarding').item.json.id] }}",
+            "Event": "Provisioning Failed – Asana Project",
+            "Note": "=Asana project creation FAILED: {{ $json.error?.message || $json.error || 'unknown error' }}\nPartial progress — Drive folder: SUCCEEDED (https://drive.google.com/drive/folders/{{ $('Create Drive Folder').item.json.id }})."
+          },
+          "schema": [
+            {
+              "id": "Client",
+              "displayName": "Client",
+              "type": "array",
+              "required": false,
+              "display": true
+            },
+            {
+              "id": "Event",
+              "displayName": "Event",
+              "type": "string",
+              "required": false,
+              "display": true
+            },
+            {
+              "id": "Note",
+              "displayName": "Note",
+              "type": "string",
+              "required": false,
+              "display": true
+            }
+          ]
+        },
+        "options": {
+          "typecast": true
+        }
+      },
+      "id": "b3c0cf25-378b-426a-ba66-d1c32d6fcb67",
+      "name": "Log: Asana Failed",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        2016,
+        384
+      ],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "oY7iME868Dyd39Xs",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "#agency-onboarding-2",
+          "mode": "name"
+        },
+        "text": "=:x: Onboarding provisioning BLOCKED for {{ $('Search Onboarding').item.json.fields['Client Name'] }}.\nStep failed: Asana project creation.\nError: {{ $json.error?.message || $json.error || 'unknown error' }}\nPartial progress — Drive folder: SUCCEEDED (https://drive.google.com/drive/folders/{{ $('Create Drive Folder').item.json.id }}).",
+        "otherOptions": {}
+      },
+      "id": "b6f887a0-5b12-4c78-bb58-38ec28289cdd",
+      "name": "Alert: Asana Failed",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.7,
+      "position": [
+        2240,
+        384
+      ],
+      "webhookId": "d074e71b-c822-43da-baad-2a47d6cefcda",
+      "credentials": {
+        "slackApi": {
+          "id": "GeeqlF42tZ9iJLdB",
+          "name": "Slack account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "mode": "id",
+          "value": "appVmRT9oz1rmIOE1"
+        },
+        "table": {
+          "__rl": true,
+          "mode": "id",
+          "value": "tblmdtGslOCGizfSs"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "matchingColumns": [
+            "id"
+          ],
+          "value": {
+            "id": "={{ $('Search Onboarding').item.json.id }}",
+            "Status": "Blocked – Slack Channel Creation Failed"
+          },
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "type": "string",
+              "required": false,
+              "display": true,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "type": "string",
+              "required": false,
+              "display": true
+            }
+          ]
+        },
+        "options": {
+          "typecast": true
+        }
+      },
+      "id": "d0ffb140-2244-437a-a495-60eac04238b4",
+      "name": "Status: Blocked (Slack)",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        2016,
+        192
+      ],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "oY7iME868Dyd39Xs",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "mode": "id",
+          "value": "appVmRT9oz1rmIOE1"
+        },
+        "table": {
+          "__rl": true,
+          "mode": "id",
+          "value": "tblGEXkPtvvMoDNIY"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Client": "={{ [$('Search Onboarding').item.json.id] }}",
+            "Event": "Provisioning Failed – Slack Channel",
+            "Note": "=Slack channel creation FAILED: {{ $json.error?.message || $json.error || 'unknown error' }}\nPartial progress — Drive folder: SUCCEEDED (https://drive.google.com/drive/folders/{{ $('Create Drive Folder').item.json.id }}); Asana project: SUCCEEDED ({{ $('Create Asana Project').item.json.permalink_url }})."
+          },
+          "schema": [
+            {
+              "id": "Client",
+              "displayName": "Client",
+              "type": "array",
+              "required": false,
+              "display": true
+            },
+            {
+              "id": "Event",
+              "displayName": "Event",
+              "type": "string",
+              "required": false,
+              "display": true
+            },
+            {
+              "id": "Note",
+              "displayName": "Note",
+              "type": "string",
+              "required": false,
+              "display": true
+            }
+          ]
+        },
+        "options": {
+          "typecast": true
+        }
+      },
+      "id": "345dfebc-c771-469b-8753-d64945229131",
+      "name": "Log: Slack Failed",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        2240,
+        192
+      ],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "oY7iME868Dyd39Xs",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "#agency-onboarding-2",
+          "mode": "name"
+        },
+        "text": "=:x: Onboarding provisioning BLOCKED for {{ $('Search Onboarding').item.json.fields['Client Name'] }}.\nStep failed: Slack channel creation.\nError: {{ $json.error?.message || $json.error || 'unknown error' }}\nPartial progress — Drive folder: SUCCEEDED (https://drive.google.com/drive/folders/{{ $('Create Drive Folder').item.json.id }}); Asana project: SUCCEEDED ({{ $('Create Asana Project').item.json.permalink_url }}).",
+        "otherOptions": {}
+      },
+      "id": "2b473117-f47f-40ff-ab7d-2a323b7ea9ee",
+      "name": "Alert: Slack Channel Failed",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.7,
+      "position": [
+        2464,
+        192
+      ],
+      "webhookId": "86da1ce1-c20d-4323-8637-b82d8bb39e25",
+      "credentials": {
+        "slackApi": {
+          "id": "GeeqlF42tZ9iJLdB",
+          "name": "Slack account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "#agency-onboarding-2",
+          "mode": "name"
+        },
+        "text": "=🚨 Intake submitted — no Onboarding record match\n\nOnboarding Record ID: {{ $('New Intake Record1').item.json.fields['Onboarding Record ID'] }}\nClient Name (as entered): {{ $('New Intake Record1').item.json.fields['Client Name'] }}\n\nCheck Airtable and link manually.",
+        "otherOptions": {}
+      },
+      "id": "5cd800fb-b0b2-48ff-9a83-79b0decaeb9d",
+      "name": "Alert: No Match Found",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.7,
+      "position": [
+        672,
+        480
+      ],
+      "webhookId": "6298c685-ac3f-4ab9-b834-bf06bae02ccd",
+      "credentials": {
+        "slackApi": {
+          "id": "GeeqlF42tZ9iJLdB",
+          "name": "Slack account 2"
+        }
+      }
+    }
+  ],
+  "pinData": {
+    "New Intake Record1": [
+      {
+        "json": {
+          "id": "recHCErIkDjgSL6tR",
+          "createdTime": "2026-08-15T21:52:21.000Z",
+          "fields": {
+            "Onboarding Record ID": "recETozAnr6Y6QyLF",
+            "Brand Colors / Style Notes": "Royal Blue and grey",
+            "Preferred Kickoff Date": "2026-08-17",
+            "Business Address": "Maryland, Lagos, Nigeria",
+            "Client Name": "Craft Coffee Roasters",
+            "Primary Contact Phone": "08052369685",
+            " Submitted At": "2026-08-15T21:52:21.000Z",
+            "Business Legal Name": "Craft coffee Ltd",
+            "Tools They Currently Use": "Zapier, make.com, vapi",
+            "Branding Assets": [
+              {
+                "id": "attKzbr7ev2Xtk09Y",
+                "width": 2448,
+                "height": 3264,
+                "url": "https://v5.airtableusercontent.com/v3/u/56/56/1786845600000/i6I6vIjGZO-m9h9vEMRFMA/HI8tHGRM-Hp4HLA_E1532PKvGvCD55XmHORZDvgjQ7AVY1SPzimrJbmoQXO9GwJ6VMt50-roKC0Vh6Z8H5gdOF7bp0j1Dlv8SxTQC1VFkxEYSaCI2ptuhmZ5L39lc9__-WL4PxzqoKyxZi1d07ByKNhkSx_AAgmKsg4KmsxLazguCbQAd69oa-rZsZvtTgal/cvI-t_rgfkSKrNeg3KpNHWju7mDktpon02vGntkLfak",
+                "filename": "IMG_20260813_174858_102.jpg",
+                "size": 2155208,
+                "type": "image/jpeg",
+                "thumbnails": {
+                  "small": {
+                    "url": "https://v5.airtableusercontent.com/v3/u/56/56/1786845600000/ck8dG6hDlVXQb7Ve_OXpMA/3AZX9Ys3W8aBGRx35Ph8U_sOvCkXxHr8RFrKIzTsZ9xgKSgt3__Zv9d_1yorCxpG0U6ZHC-ylfsF6hm946NBsQCfh7LBt9RFo5_4bLUrRF0m93bNL7UUkpAcDSfT935Qi6OcSgUxoGZSshgcmEQnMA/y5oMNbwQ5QmvpeI8XBwifVMEbnEfvBdM_738YP1Pj4g",
+                    "width": 27,
+                    "height": 36
+                  },
+                  "large": {
+                    "url": "https://v5.airtableusercontent.com/v3/u/56/56/1786845600000/q94QWAjJu1TRBlBfQJ1icg/OufQPv4DY-Uw0xdgkLhso3GbAiOl_4E8cxV_X8SBG0csdP29A8P5YVIzrdAdtcah1g8tXATOHulR9D5uJozn8ChTmvV77InWsdl7LDZfPT3TRi3tETvYyaN9tAnKaY9jrs7VGVmEYlbEOFqcAyBe-g/Gtz-JuTpXqYI_0q9QKFxdorXAbdGBvYpYTKeARpifi8",
+                    "width": 512,
+                    "height": 683
+                  },
+                  "full": {
+                    "url": "https://v5.airtableusercontent.com/v3/u/56/56/1786845600000/faj16Az5yHIE7xBvriZusQ/g-CgLMt9ZdHm1N3S4E-J_a2HnjxQ7WuCNZWTxT6Ip4hxOeiK2bscEZh9x8YnzK3QZ00KUhJsj-BFgnCQbfxfKZmPLxWtUzgLmPcw5XZGhqO_VbWC1ycPZsrGd1GejBu-1BklVynUb9qVFIkKxRxU2Q/KkyTK83YrfN95opgA8WNDCaiNwsN_eItVoo6b1tLodQ",
+                    "width": 2250,
+                    "height": 3000
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ],
+    "Create Drive Folder": [
+      {
+        "json": {
+          "kind": "drive#file",
+          "id": "1HJsgORu6t7zXHSW2EcoGdeslJX9V4Q6I",
+          "name": "Craft Coffee Roasters",
+          "mimeType": "application/vnd.google-apps.folder"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ],
+    "Create Asana Project": [
+      {
+        "json": {
+          "gid": "1217513643485917",
+          "resource_type": "project",
+          "created_at": "2026-08-15T23:06:24.960Z",
+          "modified_at": "2026-08-15T23:06:24.960Z",
+          "due_date": null,
+          "due_on": null,
+          "notes": "",
+          "archived": false,
+          "default_view": "list",
+          "default_access_level": "editor",
+          "minimum_access_level_for_customization": "editor",
+          "minimum_access_level_for_sharing": "editor",
+          "start_on": null,
+          "color": null,
+          "icon": "list",
+          "completed": false,
+          "completed_at": null,
+          "completed_by": null,
+          "public": false,
+          "privacy_setting": "private",
+          "current_status_update": null,
+          "name": "Craft Coffee Roasters",
+          "permalink_url": "https://app.asana.com/1/1217172808415169/project/1217513643485917",
+          "current_status": null,
+          "workspace": {
+            "gid": "1217172808415169",
+            "resource_type": "workspace",
+            "name": "My workspace"
+          },
+          "owner": {
+            "gid": "1217172808415157",
+            "resource_type": "user",
+            "name": "Najiyyah AbdurRahman"
+          },
+          "custom_field_settings": [],
+          "custom_fields": [],
+          "team": {
+            "gid": "1217172808415171",
+            "resource_type": "team",
+            "name": "My workspace"
+          },
+          "members": [
+            {
+              "gid": "1217172808415157",
+              "resource_type": "user",
+              "name": "Najiyyah AbdurRahman"
+            }
+          ],
+          "followers": [
+            {
+              "gid": "1217172808415157",
+              "resource_type": "user",
+              "name": "Najiyyah AbdurRahman"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "connections": {
+    "New Intake Record1": {
+      "main": [
+        [
+          {
+            "node": "Search Onboarding",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search Onboarding": {
+      "main": [
+        [
+          {
+            "node": "Match Found?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Match Found?": {
+      "main": [
+        [
+          {
+            "node": "Status: Intake Received",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Alert: No Match Found",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Status: Intake Received": {
+      "main": [
+        [
+          {
+            "node": "Log: Intake Received",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log: Intake Received": {
+      "main": [
+        [
+          {
+            "node": "Status: Provisioning",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Status: Provisioning": {
+      "main": [
+        [
+          {
+            "node": "Create Drive Folder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Drive Folder": {
+      "main": [
+        [
+          {
+            "node": "Create Asana Project",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Status: Blocked (Drive)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Asana Project": {
+      "main": [
+        [
+          {
+            "node": "Create Slack Channel",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Status: Blocked (Asana)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Slack Channel": {
+      "main": [
+        [
+          {
+            "node": "Invite to Channel",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Status: Blocked (Slack)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Invite to Channel": {
+      "main": [
+        [
+          {
+            "node": "Status: Provisioned",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Status: Provisioned": {
+      "main": [
+        [
+          {
+            "node": "Log: Provisioning Complete",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Status: Blocked (Drive)": {
+      "main": [
+        [
+          {
+            "node": "Log: Drive Failed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log: Drive Failed": {
+      "main": [
+        [
+          {
+            "node": "Alert: Drive Failed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Status: Blocked (Asana)": {
+      "main": [
+        [
+          {
+            "node": "Log: Asana Failed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log: Asana Failed": {
+      "main": [
+        [
+          {
+            "node": "Alert: Asana Failed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Status: Blocked (Slack)": {
+      "main": [
+        [
+          {
+            "node": "Log: Slack Failed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log: Slack Failed": {
+      "main": [
+        [
+          {
+            "node": "Alert: Slack Channel Failed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "1cba0313-a1c6-4e3c-b74a-1fb7485b0a35",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "0d017aa6e27c5a8626f3090d34f1f540f8d6c22d53106e8f26ac8cd5e7209bf3"
+  },
+  "nodeGroups": [],
+  "id": "lcq9H9m5lfBfsjNb",
+  "tags": []
+}

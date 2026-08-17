@@ -1,0 +1,1708 @@
+{
+  "name": "3 - PandaDoc → Airtable → Paddle Onboarding",
+  "nodes": [
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "status-completed",
+              "leftValue": "={{ $json.body[0].data.status }}",
+              "rightValue": "document.completed",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "3e47744b-ebfd-4b4d-a24d-73e1aef61c0d",
+      "name": "Is Document Completed",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        144,
+        48
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "appVmRT9oz1rmIOE1",
+          "mode": "list",
+          "cachedResultName": "Agency full onboarding system 2",
+          "cachedResultUrl": "https://airtable.com/appVmRT9oz1rmIOE1"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblmdtGslOCGizfSs",
+          "mode": "list",
+          "cachedResultName": "Onboarding",
+          "cachedResultUrl": "https://airtable.com/appVmRT9oz1rmIOE1/tblmdtGslOCGizfSs"
+        },
+        "filterByFormula": "={Panda Document ID} = \"{{ $json.body[0].data.id }}\"",
+        "returnAll": false,
+        "limit": 3,
+        "options": {}
+      },
+      "id": "9aa56ece-3f47-4cd2-b124-5e93b81ac35f",
+      "name": "Search Onboarding",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        368,
+        32
+      ],
+      "alwaysOutputData": true,
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "oY7iME868Dyd39Xs",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "has-id",
+              "leftValue": "={{ $json.id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "8fbd8c98-8410-4ba6-9711-7fb371688c9f",
+      "name": "Record Found",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        544,
+        32
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "value": "appVmRT9oz1rmIOE1",
+          "mode": "list",
+          "cachedResultName": "Agency full onboarding system 2",
+          "cachedResultUrl": "https://airtable.com/appVmRT9oz1rmIOE1"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblmdtGslOCGizfSs",
+          "mode": "list",
+          "cachedResultName": "Onboarding",
+          "cachedResultUrl": "https://airtable.com/appVmRT9oz1rmIOE1/tblmdtGslOCGizfSs"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $json.id }}",
+            "Status": "Contract Signed"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true
+            },
+            {
+              "id": "Client Name",
+              "displayName": "Client Name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Contact Name",
+              "displayName": "Contact Name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Contact Email",
+              "displayName": "Contact Email",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Kickoff Scheduled",
+                  "value": "Kickoff Scheduled"
+                },
+                {
+                  "name": "Contract Sent",
+                  "value": "Contract Sent"
+                },
+                {
+                  "name": "Provisioned",
+                  "value": "Provisioned"
+                },
+                {
+                  "name": "Blocked - Contract SLA exceeded",
+                  "value": "Blocked - Contract SLA exceeded"
+                },
+                {
+                  "name": "Deal Won",
+                  "value": "Deal Won"
+                },
+                {
+                  "name": "Contract Signed",
+                  "value": "Contract Signed"
+                },
+                {
+                  "name": "Payment Confirmed",
+                  "value": "Payment Confirmed"
+                },
+                {
+                  "name": "Intake Received",
+                  "value": "Intake Received"
+                },
+                {
+                  "name": "Provisioning",
+                  "value": "Provisioning"
+                },
+                {
+                  "name": "Welcome Sent",
+                  "value": "Welcome Sent"
+                },
+                {
+                  "name": "Kickoff Pending",
+                  "value": "Kickoff Pending"
+                },
+                {
+                  "name": "Onboarding Complete",
+                  "value": "Onboarding Complete"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Linked Deal",
+              "displayName": "Linked Deal",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Deal Value (from Linked Deal)",
+              "displayName": "Deal Value (from Linked Deal)",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Last Status Change",
+              "displayName": "Last Status Change",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Notes",
+              "displayName": "Notes",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Imported table",
+              "displayName": "Imported table",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Panda Document ID",
+              "displayName": "Panda Document ID",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Payment link",
+              "displayName": "Payment link",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Payment status",
+              "displayName": "Payment status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [],
+              "readOnly": false,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "typecast": true
+        }
+      },
+      "id": "c7ba4422-cd4e-4f48-bb9a-1d19f25d3efd",
+      "name": "Set Status Contract Signed",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        800,
+        -176
+      ],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "oY7iME868Dyd39Xs",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://sandbox-api.paddle.com/transactions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "content-type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"items\": [\n    {\n      \"quantity\": 1,\n      \"price\": {\n        \"description\": \"Onboarding service fee - {{ $('Search Onboarding').item.json.fields['Client Name'] }}\",\n        \"name\": \"Onboarding Service Fee\",\n        \"unit_price\": {\n          \"amount\": \"{{ $('Search Onboarding').item.json.fields['Deal Value (from Linked Deal)'][0] * 100 }}\",\n          \"currency_code\": \"USD\"\n        },\n        \"product\": {\n          \"name\": \"Agency Onboarding Service\",\n          \"tax_category\": \"standard\",\n          \"description\": \"Client onboarding and setup service\"\n        }\n      }\n    }\n  ],\n  \"currency_code\": \"USD\"\n}",
+        "options": {}
+      },
+      "id": "1bd68fcf-ed1d-4220-bcc7-2a577489637f",
+      "name": "Create Paddle Transaction",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        1232,
+        0
+      ],
+      "credentials": {
+        "httpTemplatedCustomAuth": {
+          "id": "011Iyjiy9EPhDzUV",
+          "name": "Simplified Custom Auth account"
+        },
+        "httpHeaderAuth": {
+          "id": "CFC7Mr7dtnLwFPKa",
+          "name": "Header Auth account 2"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Search Onboarding').item.json.fields['Contact Email'] }}",
+        "subject": "=Payment Link for Your Onboarding – {{ $('Search Onboarding').item.json.fields['Client Name'] }}",
+        "message": "=<p>Thank you for signing your contract.</p><p>Please complete your payment using the secure link below:</p><p><a href=\"{{ $('Create Paddle Transaction').item.json.data.checkout.url }}\">Complete your payment</a></p>",
+        "options": {}
+      },
+      "id": "03e575c7-f8aa-45be-a3c2-6b7ef5ae089f",
+      "name": "Email Payment Link",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1664,
+        -240
+      ],
+      "webhookId": "f743dc5e-938a-443c-8d45-48cd5ebb7fa2",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "OBhKZnYkdN1awBp2",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "appVmRT9oz1rmIOE1",
+          "mode": "list",
+          "cachedResultName": "Agency full onboarding system 2",
+          "cachedResultUrl": "https://airtable.com/appVmRT9oz1rmIOE1"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblGEXkPtvvMoDNIY",
+          "mode": "list",
+          "cachedResultName": "Activity log",
+          "cachedResultUrl": "https://airtable.com/appVmRT9oz1rmIOE1/tblGEXkPtvvMoDNIY"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Client": "=[\"{{ $('Search Onboarding').item.json.id }}\"]",
+            "Event": "Payment Link Sent to client"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "ID",
+              "displayName": "ID",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Client",
+              "displayName": "Client",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Timestamp",
+              "displayName": "Timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Event",
+              "displayName": "Event",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Note",
+              "displayName": "Note",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "typecast": true
+        }
+      },
+      "id": "07e38c14-812c-49b7-a494-071bcf12d1ea",
+      "name": "Log Payment Link Sent",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        1888,
+        -240
+      ],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "oY7iME868Dyd39Xs",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "value": "appVmRT9oz1rmIOE1",
+          "mode": "list",
+          "cachedResultName": "Agency full onboarding system 2",
+          "cachedResultUrl": "https://airtable.com/appVmRT9oz1rmIOE1"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblmdtGslOCGizfSs",
+          "mode": "list",
+          "cachedResultName": "Onboarding",
+          "cachedResultUrl": "https://airtable.com/appVmRT9oz1rmIOE1/tblmdtGslOCGizfSs"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $('Search Onboarding').item.json.id }}",
+            "Status": "Blocked – Payment Link Failed"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": false
+            },
+            {
+              "id": "Client Name",
+              "displayName": "Client Name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Contact Name",
+              "displayName": "Contact Name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Contact Email",
+              "displayName": "Contact Email",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Kickoff Scheduled",
+                  "value": "Kickoff Scheduled"
+                },
+                {
+                  "name": "Contract Sent",
+                  "value": "Contract Sent"
+                },
+                {
+                  "name": "Provisioned",
+                  "value": "Provisioned"
+                },
+                {
+                  "name": "Blocked - Contract SLA exceeded",
+                  "value": "Blocked - Contract SLA exceeded"
+                },
+                {
+                  "name": "Deal Won",
+                  "value": "Deal Won"
+                },
+                {
+                  "name": "Contract Signed",
+                  "value": "Contract Signed"
+                },
+                {
+                  "name": "Payment Confirmed",
+                  "value": "Payment Confirmed"
+                },
+                {
+                  "name": "Intake Received",
+                  "value": "Intake Received"
+                },
+                {
+                  "name": "Provisioning",
+                  "value": "Provisioning"
+                },
+                {
+                  "name": "Welcome Sent",
+                  "value": "Welcome Sent"
+                },
+                {
+                  "name": "Kickoff Pending",
+                  "value": "Kickoff Pending"
+                },
+                {
+                  "name": "Onboarding Complete",
+                  "value": "Onboarding Complete"
+                },
+                {
+                  "name": "Blocked – Payment Link Failed",
+                  "value": "Blocked – Payment Link Failed"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Linked Deal",
+              "displayName": "Linked Deal",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Deal Value (from Linked Deal)",
+              "displayName": "Deal Value (from Linked Deal)",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Last Status Change",
+              "displayName": "Last Status Change",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Notes",
+              "displayName": "Notes",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Imported table",
+              "displayName": "Imported table",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Panda Document ID",
+              "displayName": "Panda Document ID",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Payment link",
+              "displayName": "Payment link",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Payment status",
+              "displayName": "Payment status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Pending",
+                  "value": "Pending"
+                },
+                {
+                  "name": "Done",
+                  "value": "Done"
+                }
+              ],
+              "readOnly": false,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "typecast": true
+        }
+      },
+      "id": "04f5ae63-f0c8-404b-b61d-cd19f54ab7b4",
+      "name": "Set Status Blocked",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        1488,
+        144
+      ],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "oY7iME868Dyd39Xs",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "appVmRT9oz1rmIOE1",
+          "mode": "list",
+          "cachedResultName": "Agency full onboarding system 2",
+          "cachedResultUrl": "https://airtable.com/appVmRT9oz1rmIOE1"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblGEXkPtvvMoDNIY",
+          "mode": "list",
+          "cachedResultName": "Activity log",
+          "cachedResultUrl": "https://airtable.com/appVmRT9oz1rmIOE1/tblGEXkPtvvMoDNIY"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Client": "=[\"{{ $('Search Onboarding').item.json.id }}\"]",
+            "Event": "Payment Link Creation Failed",
+            "Note": "={{ $json.error.message }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "ID",
+              "displayName": "ID",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Client",
+              "displayName": "Client",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Timestamp",
+              "displayName": "Timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Event",
+              "displayName": "Event",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Note",
+              "displayName": "Note",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "typecast": true
+        }
+      },
+      "id": "f7c8f792-8894-4377-b489-dbd468a7c4e3",
+      "name": "Log Payment Failed",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        1712,
+        144
+      ],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "oY7iME868Dyd39Xs",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "#agency-onboarding-2",
+          "mode": "name"
+        },
+        "text": "=🚨 Unmatched PandaDoc signature — no Airtable record found\nDocument ID: {{ $('Webhook').item.json.body[0].data.id }}\nName: {{ $('Webhook').item.json.body[0].data.name }}\nSigner email: {{ $('Webhook').item.json.body[0].data.created_by.email }}\nTime: {{ $now.format('yyyy-MM-dd HH:mm') }}  \n\nCheck Airtable and link manually.",
+        "otherOptions": {}
+      },
+      "id": "b9b9f82e-3306-439c-9733-abccc120e8bf",
+      "name": "Slack No Match Alert",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.7,
+      "position": [
+        816,
+        144
+      ],
+      "webhookId": "76898012-5e5a-49c9-9589-a02d6be47c5d",
+      "credentials": {
+        "slackApi": {
+          "id": "GeeqlF42tZ9iJLdB",
+          "name": "Slack account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "efb5a4c7-634a-41de-8481-a3fb3bc2e2ed",
+        "options": {
+          "responseHeaders": {
+            "entries": []
+          }
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -48,
+        48
+      ],
+      "id": "a49a6cac-b04b-40ad-95b9-9ad1a364fd66",
+      "name": "Webhook",
+      "webhookId": "efb5a4c7-634a-41de-8481-a3fb3bc2e2ed"
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "appVmRT9oz1rmIOE1",
+          "mode": "list",
+          "cachedResultName": "Agency full onboarding system 2",
+          "cachedResultUrl": "https://airtable.com/appVmRT9oz1rmIOE1"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblGEXkPtvvMoDNIY",
+          "mode": "list",
+          "cachedResultName": "Activity log",
+          "cachedResultUrl": "https://airtable.com/appVmRT9oz1rmIOE1/tblGEXkPtvvMoDNIY"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Client": "=[\"{{ $json.id }}\"]",
+            "Event": "Contract signed by client"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "ID",
+              "displayName": "ID",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Client",
+              "displayName": "Client",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Timestamp",
+              "displayName": "Timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Event",
+              "displayName": "Event",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Note",
+              "displayName": "Note",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        1024,
+        -176
+      ],
+      "id": "35a77984-9842-4154-bf19-3275b927f22c",
+      "name": "Log Contract Signed",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "oY7iME868Dyd39Xs",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "value": "appVmRT9oz1rmIOE1",
+          "mode": "list",
+          "cachedResultName": "Agency full onboarding system 2",
+          "cachedResultUrl": "https://airtable.com/appVmRT9oz1rmIOE1"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblmdtGslOCGizfSs",
+          "mode": "list",
+          "cachedResultName": "Onboarding",
+          "cachedResultUrl": "https://airtable.com/appVmRT9oz1rmIOE1/tblmdtGslOCGizfSs"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $('Search Onboarding').item.json.id }}",
+            "Payment status": "Pending",
+            "Payment link": "={{ $json.data.checkout.url }}",
+            "Payment ID": "={{ $json.data.id }}",
+            "Status": "Payment Pending"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": false
+            },
+            {
+              "id": "Client Name",
+              "displayName": "Client Name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Contact Name",
+              "displayName": "Contact Name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Contact Email",
+              "displayName": "Contact Email",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Kickoff Scheduled",
+                  "value": "Kickoff Scheduled"
+                },
+                {
+                  "name": "Contract Sent",
+                  "value": "Contract Sent"
+                },
+                {
+                  "name": "Provisioned",
+                  "value": "Provisioned"
+                },
+                {
+                  "name": "Blocked - Contract SLA exceeded",
+                  "value": "Blocked - Contract SLA exceeded"
+                },
+                {
+                  "name": "Deal Won",
+                  "value": "Deal Won"
+                },
+                {
+                  "name": "Contract Signed",
+                  "value": "Contract Signed"
+                },
+                {
+                  "name": "Payment Confirmed",
+                  "value": "Payment Confirmed"
+                },
+                {
+                  "name": "Intake Received",
+                  "value": "Intake Received"
+                },
+                {
+                  "name": "Provisioning",
+                  "value": "Provisioning"
+                },
+                {
+                  "name": "Welcome Sent",
+                  "value": "Welcome Sent"
+                },
+                {
+                  "name": "Kickoff Pending",
+                  "value": "Kickoff Pending"
+                },
+                {
+                  "name": "Onboarding Complete",
+                  "value": "Onboarding Complete"
+                },
+                {
+                  "name": "Blocked – Payment Link Failed",
+                  "value": "Blocked – Payment Link Failed"
+                },
+                {
+                  "name": "Intake requested",
+                  "value": "Intake requested"
+                },
+                {
+                  "name": "Blocked",
+                  "value": "Blocked"
+                },
+                {
+                  "name": "Blocked – Drive Folder Creation Failed",
+                  "value": "Blocked – Drive Folder Creation Failed"
+                },
+                {
+                  "name": "Blocked – Asana Project Creation Failed",
+                  "value": "Blocked – Asana Project Creation Failed"
+                },
+                {
+                  "name": "Blocked – Slack Channel Creation Failed",
+                  "value": "Blocked – Slack Channel Creation Failed"
+                },
+                {
+                  "name": "Payment Pending",
+                  "value": "Payment Pending"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Linked Deal",
+              "displayName": "Linked Deal",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Deal Value (from Linked Deal)",
+              "displayName": "Deal Value (from Linked Deal)",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Last Status Change",
+              "displayName": "Last Status Change",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Notes",
+              "displayName": "Notes",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Imported table",
+              "displayName": "Imported table",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Panda Document ID",
+              "displayName": "Panda Document ID",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Panda Document link",
+              "displayName": "Panda Document link",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Payment link",
+              "displayName": "Payment link",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Payment ID",
+              "displayName": "Payment ID",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Payment status",
+              "displayName": "Payment status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Pending",
+                  "value": "Pending"
+                },
+                {
+                  "name": "Confirmed",
+                  "value": "Confirmed"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Google drive link",
+              "displayName": "Google drive link",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Asana Link",
+              "displayName": "Asana Link",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Slack Channel Link",
+              "displayName": "Slack Channel Link",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "typecast": true
+        }
+      },
+      "id": "e9bd90b4-3b90-4645-a109-5cc3eedf2093",
+      "name": "Save Payment Link and ID",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        1440,
+        -240
+      ],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "oY7iME868Dyd39Xs",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    }
+  ],
+  "pinData": {
+    "Webhook": [
+      {
+        "json": {
+          "headers": {
+            "host": "aderinsola2.app.n8n.cloud",
+            "user-agent": "PandaDoc Webhooks",
+            "content-length": "2545",
+            "accept": "*/*",
+            "accept-encoding": "gzip, br",
+            "cdn-loop": "cloudflare; loops=1; subreqs=1",
+            "cf-connecting-ip": "52.12.31.116",
+            "cf-ew-via": "15",
+            "cf-ipcountry": "US",
+            "cf-ray": "a2b17014ac6bfef9-PDX",
+            "cf-visitor": "{\"scheme\":\"https\"}",
+            "cf-worker": "n8n.cloud",
+            "content-type": "application/json",
+            "x-forwarded-for": "52.12.31.116, 172.68.174.177",
+            "x-forwarded-host": "aderinsola2.app.n8n.cloud",
+            "x-forwarded-port": "443",
+            "x-forwarded-proto": "https",
+            "x-forwarded-server": "traefik-prod-users-gwc-83-57d7f444cb-zcpbq",
+            "x-is-trusted": "yes",
+            "x-pandadoc-webhook-event-id": "87778599-1a23-3dca-9f79-91298ab6e632",
+            "x-real-ip": "52.12.31.116"
+          },
+          "params": {},
+          "query": {
+            "signature": "4d5b1bed29c03bb188a1f2529bd5c1e262924d2dd16ff9ad9bc63d70ffc973a8"
+          },
+          "body": [
+            {
+              "event": "document_state_changed",
+              "data": {
+                "id": "zjGHJ9te64scWH9EcrMWqF",
+                "name": "[DEV] Client Services Agreement - Craft Coffee Roasters",
+                "date_created": "2026-08-14T12:41:52.452919Z",
+                "date_modified": "2026-08-14T16:46:48.446467Z",
+                "expiration_date": "2026-10-13T12:41:58.877990Z",
+                "autonumbering_sequence_name": null,
+                "created_by": {
+                  "id": "PZ5mR2ZhvBuhzTwF2muMWc",
+                  "email": "aderinsola1137@gmail.com",
+                  "first_name": "",
+                  "last_name": "",
+                  "avatar": null,
+                  "membership_id": "s29KJ6U7oxrggkRYa5mPTb"
+                },
+                "metadata": {
+                  "document__created_via_public_api": "true",
+                  "document__creation_source": "template"
+                },
+                "tokens": [],
+                "fields": [
+                  {
+                    "field_id": "Text1",
+                    "uuid": "339b9746-27ba-4d48-a71e-7b63554e21b0",
+                    "name": "Text",
+                    "title": "",
+                    "placeholder": "Enter value",
+                    "value": "Benny",
+                    "assignee": "najiyyahfreelancing@gmail.com",
+                    "assignee_details": {
+                      "type": "recipient",
+                      "id": "FfXwxX6oUsAsFxGG6Ecm5m",
+                      "first_name": "Ben Ortiz",
+                      "last_name": null,
+                      "email": "najiyyahfreelancing@gmail.com",
+                      "phone": ""
+                    },
+                    "type": "text",
+                    "merge_field": null
+                  },
+                  {
+                    "field_id": "Date1",
+                    "uuid": "88fb4a65-77b8-43fe-84fe-bbad897da740",
+                    "name": "Date",
+                    "title": "",
+                    "placeholder": "Select date",
+                    "value": "2026-08-15T00:00:00",
+                    "assignee": "najiyyahfreelancing@gmail.com",
+                    "assignee_details": {
+                      "type": "recipient",
+                      "id": "FfXwxX6oUsAsFxGG6Ecm5m",
+                      "first_name": "Ben Ortiz",
+                      "last_name": null,
+                      "email": "najiyyahfreelancing@gmail.com",
+                      "phone": ""
+                    },
+                    "type": "date",
+                    "merge_field": null
+                  },
+                  {
+                    "field_id": "Signature1",
+                    "uuid": "c0e1c398-51e4-4772-aadb-bdcb09f3117f",
+                    "name": "Signature",
+                    "title": "",
+                    "placeholder": "Signature",
+                    "value": {},
+                    "assignee": "najiyyahfreelancing@gmail.com",
+                    "assignee_details": {
+                      "type": "recipient",
+                      "id": "FfXwxX6oUsAsFxGG6Ecm5m",
+                      "first_name": "Ben Ortiz",
+                      "last_name": null,
+                      "email": "najiyyahfreelancing@gmail.com",
+                      "phone": ""
+                    },
+                    "type": "signature"
+                  }
+                ],
+                "products": [],
+                "pricing": {},
+                "tags": [],
+                "status": "document.completed",
+                "recipients": [
+                  {
+                    "type": "recipient",
+                    "id": "FfXwxX6oUsAsFxGG6Ecm5m",
+                    "first_name": "Ben Ortiz",
+                    "last_name": null,
+                    "email": "najiyyahfreelancing@gmail.com",
+                    "phone": "",
+                    "recipient_type": "signer",
+                    "has_completed": true,
+                    "role": "",
+                    "roles": [
+                      "Client"
+                    ],
+                    "signing_order": null,
+                    "contact_id": "eEvYCVw6bD8AkrBVmnb42e",
+                    "shared_link": "https://app.pandadoc.com/document/v2?token=5d2fa1d2bba3723ab3b0216102255c90e1667fa4"
+                  }
+                ],
+                "sent_by": {
+                  "id": "PZ5mR2ZhvBuhzTwF2muMWc",
+                  "email": "aderinsola1137@gmail.com",
+                  "first_name": "",
+                  "last_name": "",
+                  "avatar": null,
+                  "membership_id": "s29KJ6U7oxrggkRYa5mPTb"
+                },
+                "grand_total": {
+                  "amount": "0.00",
+                  "currency": "NGN"
+                },
+                "template": {
+                  "id": "S7fiTvqjTaW3ivaEAVmXpg",
+                  "name": "Client_Services_Agreement"
+                },
+                "version": "2",
+                "default_date_format": "yyyy-MM-dd",
+                "linked_objects": []
+              }
+            }
+          ],
+          "webhookUrl": "https://aderinsola2.app.n8n.cloud/webhook-test/efb5a4c7-634a-41de-8481-a3fb3bc2e2ed",
+          "executionMode": "test"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Is Document Completed": {
+      "main": [
+        [
+          {
+            "node": "Search Onboarding",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search Onboarding": {
+      "main": [
+        [
+          {
+            "node": "Record Found",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Record Found": {
+      "main": [
+        [
+          {
+            "node": "Set Status Contract Signed",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Slack No Match Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Status Contract Signed": {
+      "main": [
+        [
+          {
+            "node": "Log Contract Signed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Paddle Transaction": {
+      "main": [
+        [
+          {
+            "node": "Save Payment Link and ID",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Set Status Blocked",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email Payment Link": {
+      "main": [
+        [
+          {
+            "node": "Log Payment Link Sent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Status Blocked": {
+      "main": [
+        [
+          {
+            "node": "Log Payment Failed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Is Document Completed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log Contract Signed": {
+      "main": [
+        [
+          {
+            "node": "Create Paddle Transaction",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Payment Link and ID": {
+      "main": [
+        [
+          {
+            "node": "Email Payment Link",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "7f6ab1b5-6ec4-44bd-855e-9f8808ec4e70",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "0d017aa6e27c5a8626f3090d34f1f540f8d6c22d53106e8f26ac8cd5e7209bf3"
+  },
+  "nodeGroups": [
+    {
+      "id": "40d0f3df-6ed4-4456-9373-dea5ac12a1c0",
+      "name": "Ingest & Validate",
+      "nodeIds": [
+        "3e47744b-ebfd-4b4d-a24d-73e1aef61c0d",
+        "9aa56ece-3f47-4cd2-b124-5e93b81ac35f",
+        "8fbd8c98-8410-4ba6-9711-7fb371688c9f"
+      ],
+      "description": "Receive PandaDoc events, keep only completed documents, and locate the Onboarding record."
+    },
+    {
+      "id": "024b7876-a7ee-43d7-8e4c-a83422b0fee8",
+      "name": "Contract Signed",
+      "nodeIds": [
+        "c7ba4422-cd4e-4f48-bb9a-1d19f25d3efd",
+        "35a77984-9842-4154-bf19-3275b927f22c"
+      ],
+      "description": "Mark the Onboarding record as Contract Signed and log the activity."
+    },
+    {
+      "id": "2c97d403-d489-47b5-9bc5-da7ab2f5a247",
+      "name": "Payment",
+      "nodeIds": [
+        "e9bd90b4-3b90-4645-a109-5cc3eedf2093",
+        "03e575c7-f8aa-45be-a3c2-6b7ef5ae089f",
+        "07e38c14-812c-49b7-a494-071bcf12d1ea"
+      ],
+      "description": "Store the Paddle sandbox payment link, email the client, and log it."
+    },
+    {
+      "id": "6817b29a-71ae-429c-bba6-e27bb790f0af",
+      "name": "Payment Failure Handling",
+      "nodeIds": [
+        "04f5ae63-f0c8-404b-b61d-cd19f54ab7b4",
+        "f7c8f792-8894-4377-b489-dbd468a7c4e3"
+      ],
+      "description": "Mark the record Blocked and log the failure when the Paddle link cannot be created."
+    }
+  ],
+  "id": "v8A2LKBJkOdeqlxm",
+  "tags": []
+}

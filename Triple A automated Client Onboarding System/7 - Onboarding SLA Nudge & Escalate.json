@@ -1,0 +1,2493 @@
+{
+  "name": "7 - Onboarding SLA Nudge & Escalate",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 2
+            }
+          ]
+        }
+      },
+      "id": "426fdb47-f8da-45fd-964a-45afeb093362",
+      "name": "Every 2 Hours",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -912,
+        1040
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "mode": "id",
+          "value": "appVmRT9oz1rmIOE1",
+          "cachedResultName": "Agency full onboarding system 2"
+        },
+        "table": {
+          "__rl": true,
+          "mode": "id",
+          "value": "tblmdtGslOCGizfSs",
+          "cachedResultName": "Onboarding"
+        },
+        "filterByFormula": "OR({Status}=\"Contract Sent\",{Status}=\"Payment Pending\",{Status}=\"Payment Confirmed\",{Status}=\"Kickoff Pending\")",
+        "options": {}
+      },
+      "id": "490e6c6d-bc47-4cd5-91c4-8520879a02b4",
+      "name": "Search Onboarding",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        -432,
+        1040
+      ],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "oY7iME868Dyd39Xs",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "intake",
+              "name": "intakeFormLink",
+              "value": "=https://airtable.com/appVmRT9oz1rmIOE1/shrL87rSay1F918yy?prefill_Client+Name={{ $json.fields['Client Name'] }}&hide_Client+Name=true&prefill_Onboarding+Record+ID={{ $json.id }}&hide_Onboarding+Record+ID=true",
+              "type": "string"
+            },
+            {
+              "id": "calcom",
+              "name": "calcomLink",
+              "value": "https://cal.com/najiyyah-abdurrahman-0k0os0/30min",
+              "type": "string"
+            },
+            {
+              "id": "81904eb0-321a-4ebd-8f43-6a9a8054901d",
+              "name": "PaymentLink",
+              "value": "={{ $json.fields['Payment link'] }}",
+              "type": "string"
+            },
+            {
+              "id": "42968fb6-c13e-4998-86e0-1f3860455911",
+              "name": "ContractFormLink",
+              "value": "={{ $json.fields['Panda Document link'] }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "240362de-ed5e-411d-b7e5-13fd6858deb0",
+      "name": "Config",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        -240,
+        1040
+      ],
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "mode": "id",
+          "value": "appVmRT9oz1rmIOE1",
+          "cachedResultName": "Agency full onboarding system 2"
+        },
+        "table": {
+          "__rl": true,
+          "mode": "id",
+          "value": "tblGEXkPtvvMoDNIY",
+          "cachedResultName": "Activity log"
+        },
+        "filterByFormula": "FIND(\"Nudge Sent\", {Event})",
+        "options": {}
+      },
+      "id": "14a5ae74-af60-4ebb-a9a1-bd182ef858ba",
+      "name": "Search Activity Log",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        -48,
+        1040
+      ],
+      "executeOnce": true,
+      "alwaysOutputData": true,
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "oY7iME868Dyd39Xs",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const now = new Date();\nconst records = $('Search Onboarding').all().map(i => i.json);\nconst logs = $('Search Activity Log').all().map(i => i.json).filter(j => j && j.Event);\nconst cfg = {\n  \"Contract Sent\":     { nudgeMin: 48, escalateAt: 120 },\n  \"Payment Pending\":   { nudgeMin: 48, escalateAt: 96 },\n  \"Payment Confirmed\": { nudgeMin: 48, escalateAt: 96 },\n  \"Kickoff Pending\":   { nudgeMin: 48, escalateAt: 96 },\n};\nconst out = [];\nfor (const r of records) {\n  const status = r[\"Status\"];\n  const c = cfg[status];\n  if (!c) continue;\n  const lastChange = r[\"Last Status Change\"];\n  let hoursElapsed = null;\n  if (lastChange) {\n    hoursElapsed = (now.getTime() - new Date(lastChange).getTime()) / 3600000;\n  }\n  const clientName = String(r[\"Client Name\"] || \"\").trim();\n  const already = logs.some(l =>\n    String(l.Event || \"\").indexOf(\"Nudge Sent\") !== -1 &&\n    String(l.Event || \"\").indexOf(status) !== -1 &&\n    clientName.length > 0 && String(l.Note || \"\").indexOf(clientName) !== -1\n  );\n  let action = \"none\";\n  if (hoursElapsed !== null) {\n    if (hoursElapsed >= c.escalateAt) action = \"escalate\";\n    else if (hoursElapsed >= c.nudgeMin && hoursElapsed < c.escalateAt) action = already ? \"none\" : \"nudge\";\n  }\n  out.push({ json: { ...r, hoursElapsed: hoursElapsed === null ? null : Math.round(hoursElapsed * 10) / 10, nudgeAlreadySent: already, action } });\n}\nreturn out;"
+      },
+      "id": "f2e30e71-df4f-4505-9900-00d921612fd7",
+      "name": "Compute",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        176,
+        1040
+      ]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.Status }}",
+                    "rightValue": "Contract Sent",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Contract Sent"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.Status }}",
+                    "rightValue": "Payment Pending",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Payment Pending"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.Status }}",
+                    "rightValue": "Payment Confirmed",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Payment Confirmed"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.Status }}",
+                    "rightValue": "Kickoff Pending",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Kickoff Pending"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "none"
+        }
+      },
+      "id": "43c7ca77-e69e-4a7e-ae70-40a88b894768",
+      "name": "Route by Status",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        576,
+        1040
+      ]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 1
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.action }}",
+                    "rightValue": "nudge",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "nudge"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 1
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.action }}",
+                    "rightValue": "escalate",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "escalate"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "none"
+        }
+      },
+      "id": "61002160-b6e0-4622-bf28-405ad5f0ce64",
+      "name": "CS Action",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        992,
+        -416
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json['Contact Email'] }}",
+        "subject": "Reminder: your contract is awaiting signature",
+        "message": "=Hi {{ $json['Contact Name'] }},<br><br>We're excited to get started! We noticed your contract hasn't been signed yet. Please review and sign it here:<br><br><a href=\"{{ $('Config').item.json.ContractFormLink }}\">Sign your contract</a><br><br>Let us know if you have any questions.<br><br>Thanks!",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "786bfffb-39fb-4137-ba7e-eb87e485637e",
+      "name": "CS Email",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1216,
+        -608
+      ],
+      "webhookId": "35d3c040-7117-443d-8f7c-a401df1a4ae3",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "OBhKZnYkdN1awBp2",
+          "name": "Gmail account"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "mode": "name",
+          "value": "onboarding-alerts",
+          "cachedResultName": "onboarding-alerts"
+        },
+        "text": "=🔔 Onboarding nudge sent — *{{ $('Compute').item.json['Client Name'] }}* — stage *Contract Sent* — {{ $('Compute').item.json.hoursElapsed }}h elapsed. Reminder email delivered.",
+        "otherOptions": {
+          "includeLinkToWorkflow": false
+        }
+      },
+      "id": "5ead3fb5-3b90-47fa-8dc1-690966c1202b",
+      "name": "CS Nudge Slack",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.7,
+      "position": [
+        1440,
+        -704
+      ],
+      "webhookId": "79ea39db-5b7b-4fd1-a3f7-24e909b1da67",
+      "credentials": {
+        "slackApi": {
+          "id": "GeeqlF42tZ9iJLdB",
+          "name": "Slack account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "mode": "id",
+          "value": "appVmRT9oz1rmIOE1",
+          "cachedResultName": "Agency full onboarding system 2"
+        },
+        "table": {
+          "__rl": true,
+          "mode": "id",
+          "value": "tblGEXkPtvvMoDNIY",
+          "cachedResultName": "Activity log"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Event": "Nudge Sent – Contract Sent",
+            "Note": "=Client: {{ $('Compute').item.json['Client Name'] }} | Stage: Contract Sent | hoursElapsed: {{ $('Compute').item.json.hoursElapsed }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Event",
+              "displayName": "Event",
+              "required": false,
+              "type": "string",
+              "display": true,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Note",
+              "displayName": "Note",
+              "required": false,
+              "type": "string",
+              "display": true,
+              "canBeUsedToMatch": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "238328da-bd7b-45fe-a370-4c8b7f10ea98",
+      "name": "CS Log Nudge",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        1664,
+        -704
+      ],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "oY7iME868Dyd39Xs",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "mode": "name",
+          "value": "onboarding-alerts",
+          "cachedResultName": "onboarding-alerts"
+        },
+        "text": "=⚠️ Onboarding nudge — *{{ $('Compute').item.json['Client Name'] }}* — stage *Contract Sent* — {{ $('Compute').item.json.hoursElapsed }}h elapsed. NOTE: client reminder email FAILED to send — please follow up manually.",
+        "otherOptions": {
+          "includeLinkToWorkflow": false
+        }
+      },
+      "id": "bd6565f2-7c36-476d-b807-94298fd7c645",
+      "name": "CS Nudge Slack (Email Failed)",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.7,
+      "position": [
+        1440,
+        -512
+      ],
+      "webhookId": "aaadc4a8-23fd-4f2e-b171-2c05915208a4",
+      "credentials": {
+        "slackApi": {
+          "id": "GeeqlF42tZ9iJLdB",
+          "name": "Slack account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "mode": "id",
+          "value": "appVmRT9oz1rmIOE1",
+          "cachedResultName": "Agency full onboarding system 2"
+        },
+        "table": {
+          "__rl": true,
+          "mode": "id",
+          "value": "tblGEXkPtvvMoDNIY",
+          "cachedResultName": "Activity log"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Event": "Nudge Sent – Contract Sent",
+            "Note": "=Client: {{ $('Compute').item.json['Client Name'] }} | Stage: Contract Sent | hoursElapsed: {{ $('Compute').item.json.hoursElapsed }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Event",
+              "displayName": "Event",
+              "required": false,
+              "type": "string",
+              "display": true,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Note",
+              "displayName": "Note",
+              "required": false,
+              "type": "string",
+              "display": true,
+              "canBeUsedToMatch": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "142b5aa1-b179-4fa6-b185-028eb459bdc0",
+      "name": "CS Log Nudge (Email Failed)",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        1664,
+        -512
+      ],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "oY7iME868Dyd39Xs",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "mode": "id",
+          "value": "appVmRT9oz1rmIOE1",
+          "cachedResultName": "Agency full onboarding system 2"
+        },
+        "table": {
+          "__rl": true,
+          "mode": "id",
+          "value": "tblmdtGslOCGizfSs",
+          "cachedResultName": "Onboarding"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "matchingColumns": [
+            "id"
+          ],
+          "value": {
+            "id": "={{ $json.id }}",
+            "Status": "Blocked – Contract Signature Timeout"
+          },
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "type": "string",
+              "display": true,
+              "canBeUsedToMatch": true,
+              "defaultMatch": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "type": "string",
+              "display": true,
+              "canBeUsedToMatch": false
+            }
+          ]
+        },
+        "options": {
+          "typecast": true
+        }
+      },
+      "id": "7b59b457-3bd6-4ed1-956e-da3b3320c071",
+      "name": "CS Escalate Update",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        1216,
+        -224
+      ],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "oY7iME868Dyd39Xs",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "mode": "name",
+          "value": "onboarding-alerts",
+          "cachedResultName": "onboarding-alerts"
+        },
+        "text": "=🚨 *ESCALATION* — *{{ $('Compute').item.json['Client Name'] }}* — stage *Contract Sent* has exceeded SLA ({{ $('Compute').item.json.hoursElapsed }}h elapsed). Status set to *Blocked – Contract Signature Timeout*. Human intervention required — no client email sent.",
+        "otherOptions": {
+          "includeLinkToWorkflow": false
+        }
+      },
+      "id": "cfcf201b-6ea1-43eb-bfbd-94249a516898",
+      "name": "CS Escalate Slack",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.7,
+      "position": [
+        1440,
+        -320
+      ],
+      "webhookId": "39384390-11f0-4dc1-ab94-4dc988593260",
+      "credentials": {
+        "slackApi": {
+          "id": "GeeqlF42tZ9iJLdB",
+          "name": "Slack account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "mode": "id",
+          "value": "appVmRT9oz1rmIOE1",
+          "cachedResultName": "Agency full onboarding system 2"
+        },
+        "table": {
+          "__rl": true,
+          "mode": "id",
+          "value": "tblGEXkPtvvMoDNIY",
+          "cachedResultName": "Activity log"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Event": "Escalated – SLA Timeout",
+            "Note": "=Client: {{ $('Compute').item.json['Client Name'] }} | Stage: Contract Sent | hoursElapsed: {{ $('Compute').item.json.hoursElapsed }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Event",
+              "displayName": "Event",
+              "required": false,
+              "type": "string",
+              "display": true,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Note",
+              "displayName": "Note",
+              "required": false,
+              "type": "string",
+              "display": true,
+              "canBeUsedToMatch": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "deea7799-ed6c-42f9-b858-78c5e412f556",
+      "name": "CS Escalate Log",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        1440,
+        -128
+      ],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "oY7iME868Dyd39Xs",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.action }}",
+                    "rightValue": "nudge",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "d96ecd0b-4a61-4dd8-af3b-310ebca2aec8"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "nudge"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.action }}",
+                    "rightValue": "escalate",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "e7ed59fd-b377-4290-a5e1-161ccc0dea3f"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "escalate"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "none"
+        }
+      },
+      "id": "66de12b5-c627-4be8-a2ff-70f1ba5ae622",
+      "name": "PP Action",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        1216,
+        544
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json['Contact Email'] }}",
+        "subject": "Reminder: your payment is still pending",
+        "message": "=Hi {{ $json['Contact Name'] }},<br><br>We noticed your payment hasn't been completed yet. Please complete it here to keep your onboarding on track:<br><br><a href=\"{{ $('Config').item.json.PaymentLink }}\">Complete your payment</a><br><br>Let us know if you have any questions.<br><br>Thanks!",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "1fa297ab-adef-4a4f-a754-6dedd902aad3",
+      "name": "PP Email",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1440,
+        352
+      ],
+      "webhookId": "fc449e93-9919-4968-97f9-e10fc1d20549",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "OBhKZnYkdN1awBp2",
+          "name": "Gmail account"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "mode": "name",
+          "value": "onboarding-alerts",
+          "cachedResultName": "onboarding-alerts"
+        },
+        "text": "=🔔 Onboarding nudge sent — *{{ $('Compute').item.json['Client Name'] }}* — stage *Payment Pending* — {{ $('Compute').item.json.hoursElapsed }}h elapsed. Reminder email delivered.",
+        "otherOptions": {
+          "includeLinkToWorkflow": false
+        }
+      },
+      "id": "47613708-1d32-49de-9889-a53302415a70",
+      "name": "PP Nudge Slack",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.7,
+      "position": [
+        1664,
+        256
+      ],
+      "webhookId": "d2a2d640-3fe1-4eec-a8c3-89496e3d3924",
+      "credentials": {
+        "slackApi": {
+          "id": "GeeqlF42tZ9iJLdB",
+          "name": "Slack account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "mode": "id",
+          "value": "appVmRT9oz1rmIOE1",
+          "cachedResultName": "Agency full onboarding system 2"
+        },
+        "table": {
+          "__rl": true,
+          "mode": "id",
+          "value": "tblGEXkPtvvMoDNIY",
+          "cachedResultName": "Activity log"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Event": "Nudge Sent – Payment Pending",
+            "Note": "=Client: {{ $('Compute').item.json['Client Name'] }} | Stage: Payment Pending | hoursElapsed: {{ $('Compute').item.json.hoursElapsed }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Event",
+              "displayName": "Event",
+              "required": false,
+              "type": "string",
+              "display": true,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Note",
+              "displayName": "Note",
+              "required": false,
+              "type": "string",
+              "display": true,
+              "canBeUsedToMatch": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "a42cf01a-3c66-4d09-9ef3-8d842081bd3e",
+      "name": "PP Log Nudge",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        1888,
+        256
+      ],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "oY7iME868Dyd39Xs",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "mode": "name",
+          "value": "onboarding-alerts",
+          "cachedResultName": "onboarding-alerts"
+        },
+        "text": "=⚠️ Onboarding nudge — *{{ $('Compute').item.json['Client Name'] }}* — stage *Payment Pending* — {{ $('Compute').item.json.hoursElapsed }}h elapsed. NOTE: client reminder email FAILED to send — please follow up manually.",
+        "otherOptions": {
+          "includeLinkToWorkflow": false
+        }
+      },
+      "id": "2f754bc8-afb9-41ea-bd8d-e049e8756f3d",
+      "name": "PP Nudge Slack (Email Failed)",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.7,
+      "position": [
+        1664,
+        464
+      ],
+      "webhookId": "158a7169-6f94-41ca-9afa-afdd82bf57c6",
+      "credentials": {
+        "slackApi": {
+          "id": "GeeqlF42tZ9iJLdB",
+          "name": "Slack account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "mode": "id",
+          "value": "appVmRT9oz1rmIOE1",
+          "cachedResultName": "Agency full onboarding system 2"
+        },
+        "table": {
+          "__rl": true,
+          "mode": "id",
+          "value": "tblGEXkPtvvMoDNIY",
+          "cachedResultName": "Activity log"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Event": "Nudge Sent – Payment Pending",
+            "Note": "=Client: {{ $('Compute').item.json['Client Name'] }} | Stage: Payment Pending | hoursElapsed: {{ $('Compute').item.json.hoursElapsed }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Event",
+              "displayName": "Event",
+              "required": false,
+              "type": "string",
+              "display": true,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Note",
+              "displayName": "Note",
+              "required": false,
+              "type": "string",
+              "display": true,
+              "canBeUsedToMatch": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "bd80ca6a-1ebd-45ab-88c7-fc17430b6a47",
+      "name": "PP Log Nudge (Email Failed)",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        1888,
+        464
+      ],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "oY7iME868Dyd39Xs",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "mode": "id",
+          "value": "appVmRT9oz1rmIOE1",
+          "cachedResultName": "Agency full onboarding system 2"
+        },
+        "table": {
+          "__rl": true,
+          "mode": "id",
+          "value": "tblmdtGslOCGizfSs",
+          "cachedResultName": "Onboarding"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "matchingColumns": [
+            "id"
+          ],
+          "value": {
+            "id": "={{ $json.id }}",
+            "Status": "Blocked – Payment Timeout"
+          },
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "type": "string",
+              "display": true,
+              "canBeUsedToMatch": true,
+              "defaultMatch": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "type": "string",
+              "display": true,
+              "canBeUsedToMatch": false
+            }
+          ]
+        },
+        "options": {
+          "typecast": true
+        }
+      },
+      "id": "55ed2111-0fbe-45ca-ae8f-41d676321c2c",
+      "name": "PP Escalate Update",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        1440,
+        736
+      ],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "oY7iME868Dyd39Xs",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "mode": "name",
+          "value": "onboarding-alerts",
+          "cachedResultName": "onboarding-alerts"
+        },
+        "text": "=🚨 *ESCALATION* — *{{ $('Compute').item.json['Client Name'] }}* — stage *Payment Pending* has exceeded SLA ({{ $('Compute').item.json.hoursElapsed }}h elapsed). Status set to *Blocked – Payment Timeout*. Human intervention required — no client email sent.",
+        "otherOptions": {
+          "includeLinkToWorkflow": false
+        }
+      },
+      "id": "472f303f-8b8d-4ad1-bd20-e89b2845c4da",
+      "name": "PP Escalate Slack",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.7,
+      "position": [
+        1712,
+        704
+      ],
+      "webhookId": "dc315d15-7be3-4a1c-910c-64409c63aca2",
+      "credentials": {
+        "slackApi": {
+          "id": "GeeqlF42tZ9iJLdB",
+          "name": "Slack account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "mode": "id",
+          "value": "appVmRT9oz1rmIOE1",
+          "cachedResultName": "Agency full onboarding system 2"
+        },
+        "table": {
+          "__rl": true,
+          "mode": "id",
+          "value": "tblGEXkPtvvMoDNIY",
+          "cachedResultName": "Activity log"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Event": "Escalated – SLA Timeout",
+            "Note": "=Client: {{ $('Compute').item.json['Client Name'] }} | Stage: Payment Pending | hoursElapsed: {{ $('Compute').item.json.hoursElapsed }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Event",
+              "displayName": "Event",
+              "required": false,
+              "type": "string",
+              "display": true,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Note",
+              "displayName": "Note",
+              "required": false,
+              "type": "string",
+              "display": true,
+              "canBeUsedToMatch": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "32ec5255-b538-401e-8fce-a041d1ea97a2",
+      "name": "PP Escalate Log",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        1712,
+        880
+      ],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "oY7iME868Dyd39Xs",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 1
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.action }}",
+                    "rightValue": "nudge",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "nudge"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 1
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.action }}",
+                    "rightValue": "escalate",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "escalate"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "none"
+        }
+      },
+      "id": "b3cdecc4-d44e-499a-80e1-e7f6e2d6a6bd",
+      "name": "PC Action",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        2128,
+        1088
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json['Contact Email'] }}",
+        "subject": "Next step: complete your onboarding intake form",
+        "message": "=Hi {{ $json['Contact Name'] }},<br><br>Thanks for your payment! To keep your onboarding moving, please complete your intake form:<br><br><a href=\"{{ $('Config').first().json.intakeFormLink }}\">Complete intake form</a><br><br>This helps us tailor everything to your needs.<br><br>Thanks!",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "6b6a82f8-f49f-4f89-ae44-f53745b5812c",
+      "name": "PC Email",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        2352,
+        896
+      ],
+      "webhookId": "e98a71ab-756f-482a-814d-1a28258b3933",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "OBhKZnYkdN1awBp2",
+          "name": "Gmail account"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "mode": "name",
+          "value": "onboarding-alerts",
+          "cachedResultName": "onboarding-alerts"
+        },
+        "text": "=🔔 Onboarding nudge sent — *{{ $('Compute').item.json['Client Name'] }}* — stage *Payment Confirmed* — {{ $('Compute').item.json.hoursElapsed }}h elapsed. Reminder email delivered.",
+        "otherOptions": {
+          "includeLinkToWorkflow": false
+        }
+      },
+      "id": "27ee8011-5a0f-49d6-a494-83fb4eb2218d",
+      "name": "PC Nudge Slack",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.7,
+      "position": [
+        2576,
+        800
+      ],
+      "webhookId": "e0e9d7b5-4f76-44a2-84c6-e6de55ede7f3",
+      "credentials": {
+        "slackApi": {
+          "id": "GeeqlF42tZ9iJLdB",
+          "name": "Slack account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "mode": "id",
+          "value": "appVmRT9oz1rmIOE1",
+          "cachedResultName": "Agency full onboarding system 2"
+        },
+        "table": {
+          "__rl": true,
+          "mode": "id",
+          "value": "tblGEXkPtvvMoDNIY",
+          "cachedResultName": "Activity log"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Event": "Nudge Sent – Payment Confirmed",
+            "Note": "=Client: {{ $('Compute').item.json['Client Name'] }} | Stage: Payment Confirmed | hoursElapsed: {{ $('Compute').item.json.hoursElapsed }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Event",
+              "displayName": "Event",
+              "required": false,
+              "type": "string",
+              "display": true,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Note",
+              "displayName": "Note",
+              "required": false,
+              "type": "string",
+              "display": true,
+              "canBeUsedToMatch": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "e796a1ca-8f34-4613-bc6c-0cef10df61f1",
+      "name": "PC Log Nudge",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        2800,
+        800
+      ],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "oY7iME868Dyd39Xs",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "mode": "name",
+          "value": "onboarding-alerts",
+          "cachedResultName": "onboarding-alerts"
+        },
+        "text": "=⚠️ Onboarding nudge — *{{ $('Compute').item.json['Client Name'] }}* — stage *Payment Confirmed* — {{ $('Compute').item.json.hoursElapsed }}h elapsed. NOTE: client reminder email FAILED to send — please follow up manually.",
+        "otherOptions": {
+          "includeLinkToWorkflow": false
+        }
+      },
+      "id": "861a27b1-8e92-4d71-8912-e1dc7f556f6c",
+      "name": "PC Nudge Slack (Email Failed)",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.7,
+      "position": [
+        2576,
+        992
+      ],
+      "webhookId": "0b6cfdd8-5e79-44a8-b9bc-bcc2ed076960",
+      "credentials": {
+        "slackApi": {
+          "id": "GeeqlF42tZ9iJLdB",
+          "name": "Slack account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "mode": "id",
+          "value": "appVmRT9oz1rmIOE1",
+          "cachedResultName": "Agency full onboarding system 2"
+        },
+        "table": {
+          "__rl": true,
+          "mode": "id",
+          "value": "tblGEXkPtvvMoDNIY",
+          "cachedResultName": "Activity log"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Event": "Nudge Sent – Payment Confirmed",
+            "Note": "=Client: {{ $('Compute').item.json['Client Name'] }} | Stage: Payment Confirmed | hoursElapsed: {{ $('Compute').item.json.hoursElapsed }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Event",
+              "displayName": "Event",
+              "required": false,
+              "type": "string",
+              "display": true,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Note",
+              "displayName": "Note",
+              "required": false,
+              "type": "string",
+              "display": true,
+              "canBeUsedToMatch": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "8189c6da-7578-4280-8e14-1bb403dd80b0",
+      "name": "PC Log Nudge (Email Failed)",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        2800,
+        992
+      ],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "oY7iME868Dyd39Xs",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "mode": "id",
+          "value": "appVmRT9oz1rmIOE1",
+          "cachedResultName": "Agency full onboarding system 2"
+        },
+        "table": {
+          "__rl": true,
+          "mode": "id",
+          "value": "tblmdtGslOCGizfSs",
+          "cachedResultName": "Onboarding"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "matchingColumns": [
+            "id"
+          ],
+          "value": {
+            "id": "={{ $json.id }}",
+            "Status": "Blocked – Payment Timeout"
+          },
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "type": "string",
+              "display": true,
+              "canBeUsedToMatch": true,
+              "defaultMatch": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "type": "string",
+              "display": true,
+              "canBeUsedToMatch": false
+            }
+          ]
+        },
+        "options": {
+          "typecast": true
+        }
+      },
+      "id": "ceac410b-198f-446f-8c23-aa1ba9b6105d",
+      "name": "PC Escalate Update",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        2352,
+        1280
+      ],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "oY7iME868Dyd39Xs",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "mode": "name",
+          "value": "onboarding-alerts",
+          "cachedResultName": "onboarding-alerts"
+        },
+        "text": "=🚨 *ESCALATION* — *{{ $('Compute').item.json['Client Name'] }}* — stage *Payment Confirmed* has exceeded SLA ({{ $('Compute').item.json.hoursElapsed }}h elapsed). Status set to *Blocked – Payment Timeout*. Human intervention required — no client email sent.",
+        "otherOptions": {
+          "includeLinkToWorkflow": false
+        }
+      },
+      "id": "6f0dea1e-6bf1-4444-965e-aae1c172fa64",
+      "name": "PC Escalate Slack",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.7,
+      "position": [
+        2576,
+        1184
+      ],
+      "webhookId": "0d24967e-96c3-4eee-971c-3fecaf43723c",
+      "credentials": {
+        "slackApi": {
+          "id": "GeeqlF42tZ9iJLdB",
+          "name": "Slack account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "mode": "id",
+          "value": "appVmRT9oz1rmIOE1",
+          "cachedResultName": "Agency full onboarding system 2"
+        },
+        "table": {
+          "__rl": true,
+          "mode": "id",
+          "value": "tblGEXkPtvvMoDNIY",
+          "cachedResultName": "Activity log"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Event": "Escalated – SLA Timeout",
+            "Note": "=Client: {{ $('Compute').item.json['Client Name'] }} | Stage: Payment Confirmed | hoursElapsed: {{ $('Compute').item.json.hoursElapsed }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Event",
+              "displayName": "Event",
+              "required": false,
+              "type": "string",
+              "display": true,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Note",
+              "displayName": "Note",
+              "required": false,
+              "type": "string",
+              "display": true,
+              "canBeUsedToMatch": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "e772b650-d50c-4bc4-874a-6be625648144",
+      "name": "PC Escalate Log",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        2576,
+        1376
+      ],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "oY7iME868Dyd39Xs",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 1
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.action }}",
+                    "rightValue": "nudge",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "nudge"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 1
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.action }}",
+                    "rightValue": "escalate",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "escalate"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "none"
+        }
+      },
+      "id": "ad3062c4-15d4-425c-931a-83935cd940b7",
+      "name": "KP Action",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        864,
+        1600
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json['Contact Email'] }}",
+        "subject": "Let's schedule your kickoff call",
+        "message": "=Hi {{ $json['Contact Name'] }},<br><br>We're ready to kick things off! Please book a time that works for you:<br><br><a href=\"{{ $('Config').first().json.calcomLink }}\">Schedule your kickoff call</a><br><br>Looking forward to it!<br><br>Thanks!",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "24e4a157-f4be-4acd-82d1-e24880f9de61",
+      "name": "KP Email",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1088,
+        1408
+      ],
+      "webhookId": "77fd1f57-ac54-41f8-abe0-2f2f190b73db",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "OBhKZnYkdN1awBp2",
+          "name": "Gmail account"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "mode": "name",
+          "value": "onboarding-alerts",
+          "cachedResultName": "onboarding-alerts"
+        },
+        "text": "=🔔 Onboarding nudge sent — *{{ $('Compute').item.json['Client Name'] }}* — stage *Kickoff Pending* — {{ $('Compute').item.json.hoursElapsed }}h elapsed. Reminder email delivered.",
+        "otherOptions": {
+          "includeLinkToWorkflow": false
+        }
+      },
+      "id": "47bb92d9-591c-4aba-9f92-5953175b5b63",
+      "name": "KP Nudge Slack",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.7,
+      "position": [
+        1312,
+        1312
+      ],
+      "webhookId": "85492ae8-8e27-4c4f-9fdb-911d981594ae",
+      "credentials": {
+        "slackApi": {
+          "id": "GeeqlF42tZ9iJLdB",
+          "name": "Slack account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "mode": "id",
+          "value": "appVmRT9oz1rmIOE1",
+          "cachedResultName": "Agency full onboarding system 2"
+        },
+        "table": {
+          "__rl": true,
+          "mode": "id",
+          "value": "tblGEXkPtvvMoDNIY",
+          "cachedResultName": "Activity log"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Event": "Nudge Sent – Kickoff Pending",
+            "Note": "=Client: {{ $('Compute').item.json['Client Name'] }} | Stage: Kickoff Pending | hoursElapsed: {{ $('Compute').item.json.hoursElapsed }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Event",
+              "displayName": "Event",
+              "required": false,
+              "type": "string",
+              "display": true,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Note",
+              "displayName": "Note",
+              "required": false,
+              "type": "string",
+              "display": true,
+              "canBeUsedToMatch": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "1cf67ac2-1117-42ee-868e-ff0a7bb0173c",
+      "name": "KP Log Nudge",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        1536,
+        1312
+      ],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "oY7iME868Dyd39Xs",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "mode": "name",
+          "value": "onboarding-alerts",
+          "cachedResultName": "onboarding-alerts"
+        },
+        "text": "=⚠️ Onboarding nudge — *{{ $('Compute').item.json['Client Name'] }}* — stage *Kickoff Pending* — {{ $('Compute').item.json.hoursElapsed }}h elapsed. NOTE: client reminder email FAILED to send — please follow up manually.",
+        "otherOptions": {
+          "includeLinkToWorkflow": false
+        }
+      },
+      "id": "c77daa7b-ad0c-4ba9-9c76-d7c12bc7bbb9",
+      "name": "KP Nudge Slack (Email Failed)",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.7,
+      "position": [
+        1312,
+        1504
+      ],
+      "webhookId": "2b10d425-f908-45a8-9bda-a0f7023e266c",
+      "credentials": {
+        "slackApi": {
+          "id": "GeeqlF42tZ9iJLdB",
+          "name": "Slack account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "mode": "id",
+          "value": "appVmRT9oz1rmIOE1",
+          "cachedResultName": "Agency full onboarding system 2"
+        },
+        "table": {
+          "__rl": true,
+          "mode": "id",
+          "value": "tblGEXkPtvvMoDNIY",
+          "cachedResultName": "Activity log"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Event": "Nudge Sent – Kickoff Pending",
+            "Note": "=Client: {{ $('Compute').item.json['Client Name'] }} | Stage: Kickoff Pending | hoursElapsed: {{ $('Compute').item.json.hoursElapsed }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Event",
+              "displayName": "Event",
+              "required": false,
+              "type": "string",
+              "display": true,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Note",
+              "displayName": "Note",
+              "required": false,
+              "type": "string",
+              "display": true,
+              "canBeUsedToMatch": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "215c10ae-400c-4c69-afee-ec5e87083db2",
+      "name": "KP Log Nudge (Email Failed)",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        1536,
+        1504
+      ],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "oY7iME868Dyd39Xs",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "mode": "id",
+          "value": "appVmRT9oz1rmIOE1",
+          "cachedResultName": "Agency full onboarding system 2"
+        },
+        "table": {
+          "__rl": true,
+          "mode": "id",
+          "value": "tblmdtGslOCGizfSs",
+          "cachedResultName": "Onboarding"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "matchingColumns": [
+            "id"
+          ],
+          "value": {
+            "id": "={{ $json.id }}",
+            "Status": "Blocked – Kickoff Timeout"
+          },
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "type": "string",
+              "display": true,
+              "canBeUsedToMatch": true,
+              "defaultMatch": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "type": "string",
+              "display": true,
+              "canBeUsedToMatch": false
+            }
+          ]
+        },
+        "options": {
+          "typecast": true
+        }
+      },
+      "id": "ed750689-2d4f-4176-bd9b-47448e242e24",
+      "name": "KP Escalate Update",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        1088,
+        1792
+      ],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "oY7iME868Dyd39Xs",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "mode": "name",
+          "value": "onboarding-alerts",
+          "cachedResultName": "onboarding-alerts"
+        },
+        "text": "=🚨 *ESCALATION* — *{{ $('Compute').item.json['Client Name'] }}* — stage *Kickoff Pending* has exceeded SLA ({{ $('Compute').item.json.hoursElapsed }}h elapsed). Status set to *Blocked – Kickoff Timeout*. Human intervention required — no client email sent.",
+        "otherOptions": {
+          "includeLinkToWorkflow": false
+        }
+      },
+      "id": "660400da-4ddb-4fd2-b888-e71875109fc6",
+      "name": "KP Escalate Slack",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.7,
+      "position": [
+        1312,
+        1696
+      ],
+      "webhookId": "c9741dd2-7e78-448b-a83c-0e894e775c57",
+      "credentials": {
+        "slackApi": {
+          "id": "GeeqlF42tZ9iJLdB",
+          "name": "Slack account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "mode": "id",
+          "value": "appVmRT9oz1rmIOE1",
+          "cachedResultName": "Agency full onboarding system 2"
+        },
+        "table": {
+          "__rl": true,
+          "mode": "id",
+          "value": "tblGEXkPtvvMoDNIY",
+          "cachedResultName": "Activity log"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Event": "Escalated – SLA Timeout",
+            "Note": "=Client: {{ $('Compute').item.json['Client Name'] }} | Stage: Kickoff Pending | hoursElapsed: {{ $('Compute').item.json.hoursElapsed }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Event",
+              "displayName": "Event",
+              "required": false,
+              "type": "string",
+              "display": true,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Note",
+              "displayName": "Note",
+              "required": false,
+              "type": "string",
+              "display": true,
+              "canBeUsedToMatch": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "016309ae-4c44-4e8d-9f51-af51b5b0bd20",
+      "name": "KP Escalate Log",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        1312,
+        1888
+      ],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "oY7iME868Dyd39Xs",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    }
+  ],
+  "pinData": {
+    "Search Onboarding": [
+      {
+        "json": {
+          "id": "recETozAnr6Y6QyLF",
+          "createdTime": "2026-08-14T09:17:29.000Z",
+          "fields": {
+            "Contact Email": "najiyyahfreelancing@gmail.com",
+            "Client Name": "Craft Coffee Roasters",
+            "Payment ID": "txn_01hv8wptq8987qeep44cyrewp9",
+            "Payment link": "https://vendors.paddle.com?_ptxn=txn_01m02g59rfsdsp2x6dw4tfd4fh",
+            "Last Status Change": "2026-08-16T19:20:34.000Z",
+            "Panda Document ID": "Jhguy7NTNjtjwa7JDTZK7D",
+            "Imported table": [
+              "reckD1lwRvxnPXYNY",
+              "recSAe1ZsXH0kZsQY",
+              "recoHDOPMGSL1oRmI",
+              "rec78UJKSYg1S3J7Y",
+              "recETV6x3Kqd3TndM",
+              "recL2goaekMXfRzIJ",
+              "recyDARIWNOKZREul",
+              "recC43YDFoLXBMcmT",
+              "recMxZ5jVnU9I4BaY",
+              "recvxIHZNAyrVHePb",
+              "recPxEYqJDA8p8aOz",
+              "recG6PJgaI1Gv0KIE",
+              "recIJCJMTpnqc5RwC",
+              "recmPNB6HVDxnGrtP",
+              "recQkl2VkvWhxDk30",
+              "recVVO5VOvcGU6OGx",
+              "recHfTMdqhvyj4Y9Y",
+              "recDBR63J5ZLeQCpI",
+              "recZXlXEyCFYIWE1B",
+              "rech7d1uc7M9YhSsd",
+              "recejOurFqgYZ4yfk",
+              "recaL9cUxghUYx1UT",
+              "recM3ARiW4kNdwLG4",
+              "rec9vNVc9VL6PybJl"
+            ],
+            "Status": "Contract Sent",
+            "Panda Document link": "https://app.pandadoc.com/document/v2?token=21d35406355d47cfea2ae8042b60b6ba3762431e",
+            "Payment status": "Confirmed",
+            "Contact Name": "Ben Ortiz",
+            "Linked Deal": [
+              "rec3EeDXuTLooBMP9"
+            ],
+            "Deal Value (from Linked Deal)": [
+              4100
+            ]
+          }
+        },
+        "pairedItem": [
+          {
+            "item": 0
+          }
+        ]
+      },
+      {
+        "json": {
+          "id": "reccxvrOCHtiA2xzo",
+          "createdTime": "2026-08-13T22:28:10.000Z",
+          "fields": {
+            "Contact Email": "maya@bloomandco.com",
+            "Client Name": "Bloom & Co Florists",
+            "Last Status Change": "2026-08-13T22:40:27.000Z",
+            "Imported table": [
+              "recDqrcY9myWGYTOR",
+              "recSwP2GZ4zPH1TSq"
+            ],
+            "Notes": "Awaiting signature, one reminder sent",
+            "Status": "Contract Sent",
+            "Contact Name": "Maya Simon",
+            "Linked Deal": [
+              "recP8xjTkoy5Uiqxy"
+            ],
+            "Deal Value (from Linked Deal)": [
+              3200
+            ]
+          }
+        },
+        "pairedItem": [
+          {
+            "item": 0
+          }
+        ]
+      }
+    ]
+  },
+  "connections": {
+    "Every 2 Hours": {
+      "main": [
+        [
+          {
+            "node": "Search Onboarding",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search Onboarding": {
+      "main": [
+        [
+          {
+            "node": "Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Config": {
+      "main": [
+        [
+          {
+            "node": "Search Activity Log",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search Activity Log": {
+      "main": [
+        [
+          {
+            "node": "Compute",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Compute": {
+      "main": [
+        [
+          {
+            "node": "Route by Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route by Status": {
+      "main": [
+        [
+          {
+            "node": "CS Action",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "PP Action",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "PC Action",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "KP Action",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "CS Action": {
+      "main": [
+        [
+          {
+            "node": "CS Email",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "CS Escalate Update",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "CS Email": {
+      "main": [
+        [
+          {
+            "node": "CS Nudge Slack",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "CS Nudge Slack (Email Failed)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "CS Nudge Slack": {
+      "main": [
+        [
+          {
+            "node": "CS Log Nudge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "CS Nudge Slack (Email Failed)": {
+      "main": [
+        [
+          {
+            "node": "CS Log Nudge (Email Failed)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "CS Escalate Update": {
+      "main": [
+        [
+          {
+            "node": "CS Escalate Slack",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "CS Escalate Log",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PP Action": {
+      "main": [
+        [
+          {
+            "node": "PP Email",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "PP Escalate Update",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PP Email": {
+      "main": [
+        [
+          {
+            "node": "PP Nudge Slack",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "PP Nudge Slack (Email Failed)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PP Nudge Slack": {
+      "main": [
+        [
+          {
+            "node": "PP Log Nudge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PP Nudge Slack (Email Failed)": {
+      "main": [
+        [
+          {
+            "node": "PP Log Nudge (Email Failed)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PP Escalate Update": {
+      "main": [
+        [
+          {
+            "node": "PP Escalate Slack",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "PP Escalate Log",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PC Action": {
+      "main": [
+        [
+          {
+            "node": "PC Email",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "PC Escalate Update",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PC Email": {
+      "main": [
+        [
+          {
+            "node": "PC Nudge Slack",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "PC Nudge Slack (Email Failed)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PC Nudge Slack": {
+      "main": [
+        [
+          {
+            "node": "PC Log Nudge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PC Nudge Slack (Email Failed)": {
+      "main": [
+        [
+          {
+            "node": "PC Log Nudge (Email Failed)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PC Escalate Update": {
+      "main": [
+        [
+          {
+            "node": "PC Escalate Slack",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "PC Escalate Log",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "KP Action": {
+      "main": [
+        [
+          {
+            "node": "KP Email",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "KP Escalate Update",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "KP Email": {
+      "main": [
+        [
+          {
+            "node": "KP Nudge Slack",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "KP Nudge Slack (Email Failed)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "KP Nudge Slack": {
+      "main": [
+        [
+          {
+            "node": "KP Log Nudge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "KP Nudge Slack (Email Failed)": {
+      "main": [
+        [
+          {
+            "node": "KP Log Nudge (Email Failed)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "KP Escalate Update": {
+      "main": [
+        [
+          {
+            "node": "KP Escalate Slack",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "KP Escalate Log",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "bed0d60e-64a4-4a80-8519-9474889a4ed2",
+  "meta": {
+    "instanceId": "0d017aa6e27c5a8626f3090d34f1f540f8d6c22d53106e8f26ac8cd5e7209bf3"
+  },
+  "nodeGroups": [
+    {
+      "id": "6140e647-8969-46d8-a755-4f5612dd0c30",
+      "name": "Contract Sent",
+      "nodeIds": [
+        "61002160-b6e0-4622-bf28-405ad5f0ce64",
+        "786bfffb-39fb-4137-ba7e-eb87e485637e",
+        "5ead3fb5-3b90-47fa-8dc1-690966c1202b",
+        "bd6565f2-7c36-476d-b807-94298fd7c645",
+        "238328da-bd7b-45fe-a370-4c8b7f10ea98",
+        "142b5aa1-b179-4fa6-b185-028eb459bdc0",
+        "7b59b457-3bd6-4ed1-956e-da3b3320c071",
+        "deea7799-ed6c-42f9-b858-78c5e412f556",
+        "cfcf201b-6ea1-43eb-bfbd-94249a516898"
+      ],
+      "description": "Nudge (48–120h) or escalate (>=120h) for the Contract Sent stage."
+    },
+    {
+      "id": "120b85c0-2c11-4258-9acc-e4484f4ead43",
+      "name": "Payment Pending",
+      "nodeIds": [
+        "66de12b5-c627-4be8-a2ff-70f1ba5ae622",
+        "1fa297ab-adef-4a4f-a754-6dedd902aad3",
+        "47613708-1d32-49de-9889-a53302415a70",
+        "2f754bc8-afb9-41ea-bd8d-e049e8756f3d",
+        "a42cf01a-3c66-4d09-9ef3-8d842081bd3e",
+        "bd80ca6a-1ebd-45ab-88c7-fc17430b6a47",
+        "55ed2111-0fbe-45ca-ae8f-41d676321c2c",
+        "32ec5255-b538-401e-8fce-a041d1ea97a2",
+        "472f303f-8b8d-4ad1-bd20-e89b2845c4da"
+      ],
+      "description": "Nudge (48–96h) or escalate (>=96h) for the Payment Pending stage."
+    },
+    {
+      "id": "dc948303-6dbb-4a16-9100-d805ba7a095e",
+      "name": "Payment Confirmed : waiting for them to fill the intake form",
+      "nodeIds": [
+        "b3cdecc4-d44e-499a-80e1-e7f6e2d6a6bd",
+        "6b6a82f8-f49f-4f89-ae44-f53745b5812c",
+        "27ee8011-5a0f-49d6-a494-83fb4eb2218d",
+        "861a27b1-8e92-4d71-8912-e1dc7f556f6c",
+        "e796a1ca-8f34-4613-bc6c-0cef10df61f1",
+        "8189c6da-7578-4280-8e14-1bb403dd80b0",
+        "ceac410b-198f-446f-8c23-aa1ba9b6105d",
+        "e772b650-d50c-4bc4-874a-6be625648144",
+        "6f0dea1e-6bf1-4444-965e-aae1c172fa64"
+      ],
+      "description": "Nudge (48–96h) or escalate (>=96h) for the Payment Confirmed stage."
+    },
+    {
+      "id": "462c0090-db57-4deb-976c-fb44f4f97e2a",
+      "name": "Kickoff Pending: waiting for them to book a call",
+      "nodeIds": [
+        "ad3062c4-15d4-425c-931a-83935cd940b7",
+        "24e4a157-f4be-4acd-82d1-e24880f9de61",
+        "47bb92d9-591c-4aba-9f92-5953175b5b63",
+        "c77daa7b-ad0c-4ba9-9c76-d7c12bc7bbb9",
+        "1cf67ac2-1117-42ee-868e-ff0a7bb0173c",
+        "215c10ae-400c-4c69-afee-ec5e87083db2",
+        "ed750689-2d4f-4176-bd9b-47448e242e24",
+        "016309ae-4c44-4e8d-9f51-af51b5b0bd20",
+        "660400da-4ddb-4fd2-b888-e71875109fc6"
+      ],
+      "description": "Nudge (48–96h) or escalate (>=96h) for the Kickoff Pending stage."
+    },
+    {
+      "id": "3a0c0247-f156-4075-98dc-c97bd1ae12f2",
+      "name": "Ingest",
+      "nodeIds": [
+        "240362de-ed5e-411d-b7e5-13fd6858deb0",
+        "490e6c6d-bc47-4cd5-91c4-8520879a02b4",
+        "14a5ae74-af60-4ebb-a9a1-bd182ef858ba",
+        "f2e30e71-df4f-4505-9900-00d921612fd7"
+      ]
+    }
+  ],
+  "id": "9V4uA4aTE1kH0ArA",
+  "tags": []
+}

@@ -1,0 +1,1210 @@
+{
+  "name": "2 - Contract Generation and Send copy",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "authentication": "airtableTokenApi",
+        "baseId": {
+          "__rl": true,
+          "value": "appVmRT9oz1rmIOE1",
+          "mode": "id"
+        },
+        "tableId": {
+          "__rl": true,
+          "value": "tblmdtGslOCGizfSs",
+          "mode": "id"
+        },
+        "triggerField": "Last Status Change",
+        "additionalFields": {
+          "formula": "Status = \"Deal Won\""
+        }
+      },
+      "id": "592f1e8d-3da6-4244-8837-702c75dfbd8a",
+      "name": "Onboarding Status Trigger",
+      "type": "n8n-nodes-base.airtableTrigger",
+      "typeVersion": 1,
+      "position": [
+        -320,
+        -16
+      ],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "oY7iME868Dyd39Xs",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "status-deal-won",
+              "leftValue": "={{ $json.fields.Status }}",
+              "rightValue": "Deal Won",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "bfe00dac-61b3-41c8-ba9a-3b1177806fd1",
+      "name": "Only Deal Won",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        -96,
+        -16
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "value": "appVmRT9oz1rmIOE1",
+          "mode": "list",
+          "cachedResultName": "Agency full onboarding system 2",
+          "cachedResultUrl": "https://airtable.com/appVmRT9oz1rmIOE1"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblmdtGslOCGizfSs",
+          "mode": "list",
+          "cachedResultName": "Onboarding",
+          "cachedResultUrl": "https://airtable.com/appVmRT9oz1rmIOE1/tblmdtGslOCGizfSs"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $('Onboarding Status Trigger').item.json.id }}",
+            "Status": "Blocked - Contract SLA exceeded"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": false
+            },
+            {
+              "id": "Client Name",
+              "displayName": "Client Name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Contact Name",
+              "displayName": "Contact Name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Contact Email",
+              "displayName": "Contact Email",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Kickoff Scheduled",
+                  "value": "Kickoff Scheduled"
+                },
+                {
+                  "name": "Contract Sent",
+                  "value": "Contract Sent"
+                },
+                {
+                  "name": "Provisioned",
+                  "value": "Provisioned"
+                },
+                {
+                  "name": "Blocked - Contract SLA exceeded",
+                  "value": "Blocked - Contract SLA exceeded"
+                },
+                {
+                  "name": "Deal Won",
+                  "value": "Deal Won"
+                },
+                {
+                  "name": "Contract Signed",
+                  "value": "Contract Signed"
+                },
+                {
+                  "name": "Payment Confirmed",
+                  "value": "Payment Confirmed"
+                },
+                {
+                  "name": "Intake Received",
+                  "value": "Intake Received"
+                },
+                {
+                  "name": "Provisioning",
+                  "value": "Provisioning"
+                },
+                {
+                  "name": "Welcome Sent",
+                  "value": "Welcome Sent"
+                },
+                {
+                  "name": "Kickoff Pending",
+                  "value": "Kickoff Pending"
+                },
+                {
+                  "name": "Onboarding Complete",
+                  "value": "Onboarding Complete"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Linked Deal",
+              "displayName": "Linked Deal",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Deal Value (from Linked Deal)",
+              "displayName": "Deal Value (from Linked Deal)",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Last Status Change",
+              "displayName": "Last Status Change",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Notes",
+              "displayName": "Notes",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Imported table",
+              "displayName": "Imported table",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "typecast": true
+        }
+      },
+      "id": "740d2c29-e560-4568-91f8-0e5888fb914e",
+      "name": "Set Status Blocked",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        1328,
+        384
+      ],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "oY7iME868Dyd39Xs",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "appVmRT9oz1rmIOE1",
+          "mode": "list",
+          "cachedResultName": "Agency full onboarding system 2",
+          "cachedResultUrl": "https://airtable.com/appVmRT9oz1rmIOE1"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblGEXkPtvvMoDNIY",
+          "mode": "list",
+          "cachedResultName": "Activity log",
+          "cachedResultUrl": "https://airtable.com/appVmRT9oz1rmIOE1/tblGEXkPtvvMoDNIY"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Client": "={{ [$('Onboarding Status Trigger').item.json.id] }}",
+            "Event": "Sending of contract through PandaDoc failed"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Client",
+              "displayName": "Client",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Event",
+              "displayName": "Event",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "typecast": true
+        }
+      },
+      "id": "3c76efd8-76df-4608-ab35-ac6c9b6b60e9",
+      "name": "Log Send Failure",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        1552,
+        384
+      ],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "oY7iME868Dyd39Xs",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://api.pandadoc.com/public/v1/documents/{{ $json.id }}/send",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"subject\": \"Please sign: Client Services Agreement\",\n  \"message\": \"Hi, please review and sign our Client Services Agreement to get started..\",\n  \"silent\": false\n}\n",
+        "options": {
+          "response": {
+            "response": {}
+          }
+        }
+      },
+      "id": "da9639fe-541e-4e33-9a40-4b9b5062266c",
+      "name": "Send PandaDoc Document (Send)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        1056,
+        -48
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "T3eQwqQP2HfeOMp4",
+          "name": "Header Auth account"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "value": "appVmRT9oz1rmIOE1",
+          "mode": "list",
+          "cachedResultName": "Agency full onboarding system 2",
+          "cachedResultUrl": "https://airtable.com/appVmRT9oz1rmIOE1"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblmdtGslOCGizfSs",
+          "mode": "list",
+          "cachedResultName": "Onboarding",
+          "cachedResultUrl": "https://airtable.com/appVmRT9oz1rmIOE1/tblmdtGslOCGizfSs"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $('Onboarding Status Trigger').item.json.id }}",
+            "Status": "Contract Sent",
+            "Panda Document ID": "={{ $json.id }}",
+            "Panda Document link": "={{ $json.recipients[0].shared_link }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": false
+            },
+            {
+              "id": "Client Name",
+              "displayName": "Client Name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Contact Name",
+              "displayName": "Contact Name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Contact Email",
+              "displayName": "Contact Email",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Kickoff Scheduled",
+                  "value": "Kickoff Scheduled"
+                },
+                {
+                  "name": "Contract Sent",
+                  "value": "Contract Sent"
+                },
+                {
+                  "name": "Provisioned",
+                  "value": "Provisioned"
+                },
+                {
+                  "name": "Blocked - Contract SLA exceeded",
+                  "value": "Blocked - Contract SLA exceeded"
+                },
+                {
+                  "name": "Deal Won",
+                  "value": "Deal Won"
+                },
+                {
+                  "name": "Contract Signed",
+                  "value": "Contract Signed"
+                },
+                {
+                  "name": "Payment Confirmed",
+                  "value": "Payment Confirmed"
+                },
+                {
+                  "name": "Intake Received",
+                  "value": "Intake Received"
+                },
+                {
+                  "name": "Provisioning",
+                  "value": "Provisioning"
+                },
+                {
+                  "name": "Welcome Sent",
+                  "value": "Welcome Sent"
+                },
+                {
+                  "name": "Kickoff Pending",
+                  "value": "Kickoff Pending"
+                },
+                {
+                  "name": "Onboarding Complete",
+                  "value": "Onboarding Complete"
+                },
+                {
+                  "name": "Blocked – Payment Link Failed",
+                  "value": "Blocked – Payment Link Failed"
+                },
+                {
+                  "name": "Intake requested",
+                  "value": "Intake requested"
+                },
+                {
+                  "name": "Blocked",
+                  "value": "Blocked"
+                },
+                {
+                  "name": "Blocked – Drive Folder Creation Failed",
+                  "value": "Blocked – Drive Folder Creation Failed"
+                },
+                {
+                  "name": "Blocked – Asana Project Creation Failed",
+                  "value": "Blocked – Asana Project Creation Failed"
+                },
+                {
+                  "name": "Blocked – Slack Channel Creation Failed",
+                  "value": "Blocked – Slack Channel Creation Failed"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Linked Deal",
+              "displayName": "Linked Deal",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Deal Value (from Linked Deal)",
+              "displayName": "Deal Value (from Linked Deal)",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Last Status Change",
+              "displayName": "Last Status Change",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Notes",
+              "displayName": "Notes",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Imported table",
+              "displayName": "Imported table",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Panda Document ID",
+              "displayName": "Panda Document ID",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Panda Document link",
+              "displayName": "Panda Document link",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Payment link",
+              "displayName": "Payment link",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Payment ID",
+              "displayName": "Payment ID",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Payment status",
+              "displayName": "Payment status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Pending",
+                  "value": "Pending"
+                },
+                {
+                  "name": "Confirmed",
+                  "value": "Confirmed"
+                }
+              ],
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Google drive link",
+              "displayName": "Google drive link",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Asana Link",
+              "displayName": "Asana Link",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Slack Channel Link",
+              "displayName": "Slack Channel Link",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "typecast": true
+        }
+      },
+      "id": "588e5d63-602f-4d42-8c79-4bece8ed953f",
+      "name": "Set Status Contract Sent",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        1296,
+        -80
+      ],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "oY7iME868Dyd39Xs",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "appVmRT9oz1rmIOE1",
+          "mode": "list",
+          "cachedResultName": "Agency full onboarding system 2",
+          "cachedResultUrl": "https://airtable.com/appVmRT9oz1rmIOE1"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblGEXkPtvvMoDNIY",
+          "mode": "list",
+          "cachedResultName": "Activity log",
+          "cachedResultUrl": "https://airtable.com/appVmRT9oz1rmIOE1/tblGEXkPtvvMoDNIY"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Client": "={{ [$('Onboarding Status Trigger').item.json.id] }}",
+            "Event": "Status changed: Deal Won -> Contract Sent"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "ID",
+              "displayName": "ID",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Client",
+              "displayName": "Client",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Timestamp",
+              "displayName": "Timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": false
+            },
+            {
+              "id": "Event",
+              "displayName": "Event",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Note",
+              "displayName": "Note",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "typecast": true
+        }
+      },
+      "id": "57d6951d-4e3e-4970-97e6-fe94eb78c7bc",
+      "name": "Log Contract Sent",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        1520,
+        -80
+      ],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "oY7iME868Dyd39Xs",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.pandadoc.com/public/v1/documents",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"name\": \"Client Services Agreement - {{ $json.fields['Client Name'] }}\",\n  \"template_uuid\": \"b533zmYx56KLuqmi3A3Wv8\",\n  \"recipients\": [\n    {\n      \"email\": \"{{ $json.fields['Contact Email'] }}\",\n      \"first_name\": \"{{ $json.fields['Contact Name'] }}\",\n      \"role\": \"Client\"\n    }\n  ],\n  \"tokens\": [\n    { \"name\": \"Client.Name\", \"value\": \"{{ $json.fields['Client Name'] }}\" },\n    { \"name\": \"Client.Email\", \"value\": \"{{ $json.fields['Contact Email'] }}\" },\n    { \"name\": \"Deal.Value\", \"value\": \"{{ $json.fields['Deal Value (from Linked Deal)'][0] }}\" },\n    { \"name\": \"Start.Date\", \"value\": \"{{ $now.format('yyyy-MM-dd') }}\" }\n  ]\n}",
+        "options": {
+          "response": {
+            "response": {}
+          }
+        }
+      },
+      "id": "8a735207-1fce-4f52-998c-7e19c3b8b7b7",
+      "name": "Create PandaDoc Document",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        128,
+        -16
+      ],
+      "alwaysOutputData": true,
+      "retryOnFail": false,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "T3eQwqQP2HfeOMp4",
+          "name": "Header Auth account"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        400,
+        -32
+      ],
+      "id": "adc1cce9-b69e-4e93-915c-6dd7e993ad30",
+      "name": "Wait",
+      "webhookId": "a5fa8883-f3b9-4c85-adaf-780e1b4ada61"
+    },
+    {
+      "parameters": {
+        "url": "=https://api.pandadoc.com/public/v1/documents/{{ $('Create PandaDoc Document').item.json.id }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        624,
+        -32
+      ],
+      "id": "a53147cb-18a9-4e05-aed4-61077d5e046f",
+      "name": "HTTP Request",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "T3eQwqQP2HfeOMp4",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "38e63992-be30-49eb-aada-70d5371e50c8",
+              "leftValue": "={{ $json.status }}",
+              "rightValue": "document.draft",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        848,
+        -32
+      ],
+      "id": "2a59cc6a-e2b9-4327-97f0-4146cc23ca33",
+      "name": "If"
+    }
+  ],
+  "pinData": {
+    "Onboarding Status Trigger": [
+      {
+        "json": {
+          "id": "recETozAnr6Y6QyLF",
+          "createdTime": "2026-08-14T09:17:29.000Z",
+          "fields": {
+            "Contact Email": "najiyyahfreelancing@gmail.com",
+            "Client Name": "Craft Coffee Roasters",
+            "Last Status Change": "2026-08-14T13:42:06.000Z",
+            "Imported table": [
+              "reckD1lwRvxnPXYNY",
+              "recSAe1ZsXH0kZsQY",
+              "recoHDOPMGSL1oRmI",
+              "rec78UJKSYg1S3J7Y",
+              "recETV6x3Kqd3TndM",
+              "recL2goaekMXfRzIJ",
+              "recyDARIWNOKZREul"
+            ],
+            "Status": "Deal Won",
+            "Contact Name": "Ben Ortiz",
+            "Linked Deal": [
+              "rec3EeDXuTLooBMP9"
+            ],
+            "Deal Value (from Linked Deal)": [
+              4100
+            ]
+          }
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ],
+    "Create PandaDoc Document": [
+      {
+        "json": {
+          "id": "Jhguy7NTNjtjwa7JDTZK7D",
+          "name": "[DEV] Client Services Agreement - Craft Coffee Roasters",
+          "status": "document.uploaded",
+          "date_created": "2026-08-14T15:59:21.938287Z",
+          "date_modified": "2026-08-14T15:59:21.938287Z",
+          "expiration_date": null,
+          "version": null,
+          "uuid": "Jhguy7NTNjtjwa7JDTZK7D",
+          "links": [
+            {
+              "rel": "status",
+              "href": "https://api.pandadoc.com/public/v1/documents/Jhguy7NTNjtjwa7JDTZK7D",
+              "type": "GET"
+            }
+          ],
+          "info_message": "You need to poll the Document Status method until the status will be changed to document.draft"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ],
+    "HTTP Request": [
+      {
+        "json": {
+          "id": "Jhguy7NTNjtjwa7JDTZK7D",
+          "name": "[DEV] Client Services Agreement - Craft Coffee Roasters",
+          "status": "document.draft",
+          "date_created": "2026-08-14T15:59:22.621905Z",
+          "date_modified": "2026-08-14T15:59:23.795486Z",
+          "date_completed": null,
+          "expiration_date": null,
+          "version": "2",
+          "uuid": "Jhguy7NTNjtjwa7JDTZK7D"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ],
+    "Send PandaDoc Document (Send)": [
+      {
+        "json": {
+          "id": "Jhguy7NTNjtjwa7JDTZK7D",
+          "name": "[DEV] Client Services Agreement - Craft Coffee Roasters",
+          "status": "document.sent",
+          "date_created": "2026-08-14T15:59:22.621905Z",
+          "date_modified": "2026-08-14T15:59:29.261685Z",
+          "date_completed": null,
+          "expiration_date": "2026-10-13T15:59:28.669951Z",
+          "version": "2",
+          "uuid": "Jhguy7NTNjtjwa7JDTZK7D",
+          "recipients": [
+            {
+              "id": "PTjDrevDW7yZzXCR4geMCK",
+              "first_name": "Ben Ortiz",
+              "last_name": null,
+              "email": "najiyyahfreelancing@gmail.com",
+              "phone": "",
+              "recipient_type": "signer",
+              "signing_order": null,
+              "shared_link": "https://app.pandadoc.com/document/v2?token=21d35406355d47cfea2ae8042b60b6ba3762431e",
+              "delivery_methods": {
+                "sms": false,
+                "email": true
+              },
+              "type": "recipient"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Onboarding Status Trigger": {
+      "main": [
+        [
+          {
+            "node": "Only Deal Won",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Only Deal Won": {
+      "main": [
+        [
+          {
+            "node": "Create PandaDoc Document",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Status Blocked": {
+      "main": [
+        [
+          {
+            "node": "Log Send Failure",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send PandaDoc Document (Send)": {
+      "main": [
+        [
+          {
+            "node": "Set Status Contract Sent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Set Status Blocked",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Status Contract Sent": {
+      "main": [
+        [
+          {
+            "node": "Log Contract Sent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create PandaDoc Document": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Set Status Blocked",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Send PandaDoc Document (Send)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "17047e61-ba8c-4756-8e56-443fe5466cb0",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "0d017aa6e27c5a8626f3090d34f1f540f8d6c22d53106e8f26ac8cd5e7209bf3"
+  },
+  "nodeGroups": [
+    {
+      "id": "11b81b4e-cd1a-4bec-ae31-4f7b9ef3b053",
+      "name": "Success path",
+      "nodeIds": [
+        "588e5d63-602f-4d42-8c79-4bece8ed953f",
+        "57d6951d-4e3e-4970-97e6-fe94eb78c7bc"
+      ],
+      "description": "Mark the record Contract Sent and log the activity."
+    },
+    {
+      "id": "609379b0-659f-4e5e-ac24-40a9e4805dae",
+      "name": "Failure path",
+      "nodeIds": [
+        "740d2c29-e560-4568-91f8-0e5888fb914e",
+        "3c76efd8-76df-4608-ab35-ac6c9b6b60e9"
+      ],
+      "description": "On PandaDoc create or send failure, mark the record Blocked and log the failure for human review."
+    }
+  ],
+  "id": "JMyEv8FjIDdlDPf5",
+  "tags": []
+}

@@ -1,0 +1,1080 @@
+{
+  "name": "6 - Welcome Email + Kickoff Scheduling",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "authentication": "airtableTokenApi",
+        "baseId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "appVmRT9oz1rmIOE1",
+          "cachedResultName": "Agency full onboarding system 2"
+        },
+        "tableId": {
+          "__rl": true,
+          "value": "tblmdtGslOCGizfSs",
+          "mode": "id"
+        },
+        "triggerField": "Last Status Change",
+        "additionalFields": {
+          "formula": "{Status}='Provisioned'"
+        }
+      },
+      "id": "cb5ee423-8416-4663-af9d-179210f2d523",
+      "name": "Onboarding Provisioned",
+      "type": "n8n-nodes-base.airtableTrigger",
+      "typeVersion": 1,
+      "position": [
+        -912,
+        464
+      ],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "oY7iME868Dyd39Xs",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.fields['Contact Email'] }}",
+        "subject": "=Welcome aboard, {{ $json.fields['Client Name'] }} — your account is ready",
+        "message": "=Hi {{ $json.fields['Contact Name'] }},<br><br>Great news — your account setup for <b>{{ $json.fields['Client Name'] }}</b> is complete and fully provisioned.<br><br>The next step is your kickoff call. Please pick a time that works for you here:<br><a href=\"https://cal.com/najiyyah-abdurrahman-0k0os0/30min\">Book your kickoff call</a><br><br>We look forward to working with you!<br><br>The Team",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "1d8e8864-4994-4f3b-851a-d60a5c058c53",
+      "name": "Send Welcome Email",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        -608,
+        464
+      ],
+      "webhookId": "6cadaaf5-0517-4dd7-9613-00b5bb9df670",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "OBhKZnYkdN1awBp2",
+          "name": "Gmail account"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "mode": "id",
+          "value": "appVmRT9oz1rmIOE1",
+          "cachedResultName": "Agency full onboarding system 2"
+        },
+        "table": {
+          "__rl": true,
+          "mode": "id",
+          "value": "tblmdtGslOCGizfSs",
+          "cachedResultName": "Onboarding"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $(\"Onboarding Provisioned\").item.json.id }}",
+            "Status": "Kickoff Pending"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": false
+            },
+            {
+              "id": "Client Name",
+              "displayName": "Client Name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Contact Name",
+              "displayName": "Contact Name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Contact Email",
+              "displayName": "Contact Email",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Kickoff Scheduled",
+                  "value": "Kickoff Scheduled"
+                },
+                {
+                  "name": "Contract Sent",
+                  "value": "Contract Sent"
+                },
+                {
+                  "name": "Provisioned",
+                  "value": "Provisioned"
+                },
+                {
+                  "name": "Blocked - Contract SLA exceeded",
+                  "value": "Blocked - Contract SLA exceeded"
+                },
+                {
+                  "name": "Deal Won",
+                  "value": "Deal Won"
+                },
+                {
+                  "name": "Contract Signed",
+                  "value": "Contract Signed"
+                },
+                {
+                  "name": "Payment Confirmed",
+                  "value": "Payment Confirmed"
+                },
+                {
+                  "name": "Intake Received",
+                  "value": "Intake Received"
+                },
+                {
+                  "name": "Provisioning",
+                  "value": "Provisioning"
+                },
+                {
+                  "name": "Welcome Sent",
+                  "value": "Welcome Sent"
+                },
+                {
+                  "name": "Kickoff Pending",
+                  "value": "Kickoff Pending"
+                },
+                {
+                  "name": "Onboarding Complete",
+                  "value": "Onboarding Complete"
+                },
+                {
+                  "name": "Blocked – Payment Link Failed",
+                  "value": "Blocked – Payment Link Failed"
+                },
+                {
+                  "name": "Intake requested",
+                  "value": "Intake requested"
+                },
+                {
+                  "name": "Blocked",
+                  "value": "Blocked"
+                },
+                {
+                  "name": "Blocked – Drive Folder Creation Failed",
+                  "value": "Blocked – Drive Folder Creation Failed"
+                },
+                {
+                  "name": "Blocked – Asana Project Creation Failed",
+                  "value": "Blocked – Asana Project Creation Failed"
+                },
+                {
+                  "name": "Blocked – Slack Channel Creation Failed",
+                  "value": "Blocked – Slack Channel Creation Failed"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Linked Deal",
+              "displayName": "Linked Deal",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Deal Value (from Linked Deal)",
+              "displayName": "Deal Value (from Linked Deal)",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Last Status Change",
+              "displayName": "Last Status Change",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Notes",
+              "displayName": "Notes",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Imported table",
+              "displayName": "Imported table",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Panda Document ID",
+              "displayName": "Panda Document ID",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Payment link",
+              "displayName": "Payment link",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Payment ID",
+              "displayName": "Payment ID",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Payment status",
+              "displayName": "Payment status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Pending",
+                  "value": "Pending"
+                },
+                {
+                  "name": "Confirmed",
+                  "value": "Confirmed"
+                }
+              ],
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Google drive link",
+              "displayName": "Google drive link",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Asana Link",
+              "displayName": "Asana Link",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Slack Channel Link",
+              "displayName": "Slack Channel Link",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "bf788d45-a2b8-4113-9f4e-5307986c0680",
+      "name": "Set Status: Kickoff Pending",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        -384,
+        272
+      ],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "oY7iME868Dyd39Xs",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "mode": "id",
+          "value": "appVmRT9oz1rmIOE1",
+          "cachedResultName": "Agency full onboarding system 2"
+        },
+        "table": {
+          "__rl": true,
+          "mode": "id",
+          "value": "tblGEXkPtvvMoDNIY",
+          "cachedResultName": "Activity log"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Event": "Welcome Email Sent",
+            "Client": "={{ [$(\"Onboarding Provisioned\").item.json.id] }}",
+            "Note": "=Welcome email sent to {{ $json.fields['Contact Email'] }} at {{ $now.toISO() }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "ID",
+              "displayName": "ID",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": false
+            },
+            {
+              "id": "Client",
+              "displayName": "Client",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Timestamp",
+              "displayName": "Timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Event",
+              "displayName": "Event",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Note",
+              "displayName": "Note",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "typecast": true
+        }
+      },
+      "id": "fe649099-23c1-4e34-98f1-42a86461373c",
+      "name": "Log: Welcome Email Sent",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        -160,
+        272
+      ],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "oY7iME868Dyd39Xs",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "mode": "id",
+          "value": "appVmRT9oz1rmIOE1",
+          "cachedResultName": "Agency full onboarding system 2"
+        },
+        "table": {
+          "__rl": true,
+          "mode": "id",
+          "value": "tblmdtGslOCGizfSs",
+          "cachedResultName": "Onboarding"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "matchingColumns": [
+            "id"
+          ],
+          "value": {
+            "id": "={{ $(\"Onboarding Provisioned\").item.json.id }}",
+            "Status": "Blocked – Welcome Email Failed"
+          },
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            }
+          ]
+        },
+        "options": {
+          "typecast": true
+        }
+      },
+      "id": "010ca7f0-d852-42a3-b5fa-92f3b1499545",
+      "name": "Set Status: Blocked",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        -384,
+        560
+      ],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "oY7iME868Dyd39Xs",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "mode": "id",
+          "value": "appVmRT9oz1rmIOE1",
+          "cachedResultName": "Agency full onboarding system 2"
+        },
+        "table": {
+          "__rl": true,
+          "mode": "id",
+          "value": "tblGEXkPtvvMoDNIY",
+          "cachedResultName": "Activity log"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Event": "Welcome Email Failed",
+            "Client": "={{ [$(\"Onboarding Provisioned\").item.json.id] }}",
+            "Note": "=Welcome email FAILED for {{ $('Onboarding Provisioned').item.json.fields['Client Name'] }} at {{ $now.toISO() }}. Error: {{ $json.error?.message || $json.error || \"unknown error\" }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Event",
+              "displayName": "Event",
+              "required": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "Client",
+              "displayName": "Client",
+              "required": false,
+              "display": true,
+              "type": "array",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "Note",
+              "displayName": "Note",
+              "required": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "typecast": true
+        }
+      },
+      "id": "283c66d5-3297-418f-9357-83062c34f28f",
+      "name": "Log: Welcome Email Failed",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        -160,
+        464
+      ],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "oY7iME868Dyd39Xs",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "#agency-onboarding-2",
+          "mode": "name"
+        },
+        "text": "=:rotating_light: Welcome email FAILED for *{{ $(\"Onboarding Provisioned\").item.json[\"Client Name\"] }}* ({{ $(\"Onboarding Provisioned\").item.json[\"Contact Email\"] }}). Status set to \"Blocked – Welcome Email Failed\". Please investigate.",
+        "otherOptions": {}
+      },
+      "id": "331b72e8-5f05-4dec-ae43-b1404568ca79",
+      "name": "Slack Alert: Welcome Email Failed",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.7,
+      "position": [
+        -160,
+        656
+      ],
+      "webhookId": "80272611-6955-4a27-8b67-2e38cdcf1f11",
+      "credentials": {
+        "slackApi": {
+          "id": "GeeqlF42tZ9iJLdB",
+          "name": "Slack account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "calcom-kickoff-booked",
+        "options": {}
+      },
+      "id": "b5092e45-31c1-403f-a397-4978be9b60e8",
+      "name": "Cal.com Booking Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        192,
+        480
+      ],
+      "webhookId": "8c1a05d8-42c8-4911-a351-e38cebcb7f18"
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "mode": "id",
+          "value": "appVmRT9oz1rmIOE1",
+          "cachedResultName": "Agency full onboarding system 2"
+        },
+        "table": {
+          "__rl": true,
+          "mode": "id",
+          "value": "tblmdtGslOCGizfSs",
+          "cachedResultName": "Onboarding"
+        },
+        "filterByFormula": "=LOWER({Contact Email})=LOWER(\"{{ $json.body.payload.attendees[0].email }}\")",
+        "returnAll": false,
+        "limit": 1,
+        "options": {}
+      },
+      "id": "d4cd15dd-ad01-47a4-9731-264b6ab7e200",
+      "name": "Find Onboarding Record",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        464,
+        480
+      ],
+      "alwaysOutputData": true,
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "oY7iME868Dyd39Xs",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "has-id",
+              "leftValue": "={{ $json.id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "227e53d3-e0fd-4a47-a567-4a3032ee6996",
+      "name": "Match Found?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        688,
+        480
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "mode": "id",
+          "value": "appVmRT9oz1rmIOE1",
+          "cachedResultName": "Agency full onboarding system 2"
+        },
+        "table": {
+          "__rl": true,
+          "mode": "id",
+          "value": "tblmdtGslOCGizfSs",
+          "cachedResultName": "Onboarding"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "matchingColumns": [
+            "id"
+          ],
+          "value": {
+            "id": "={{ $json.id }}",
+            "Status": "Kickoff Scheduled"
+          },
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            }
+          ]
+        },
+        "options": {
+          "typecast": true
+        }
+      },
+      "id": "98a09666-586c-4ab5-bce8-25970011aaf1",
+      "name": "Set Status: Kickoff Scheduled",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        912,
+        384
+      ],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "oY7iME868Dyd39Xs",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "mode": "id",
+          "value": "appVmRT9oz1rmIOE1",
+          "cachedResultName": "Agency full onboarding system 2"
+        },
+        "table": {
+          "__rl": true,
+          "mode": "id",
+          "value": "tblGEXkPtvvMoDNIY",
+          "cachedResultName": "Activity log"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Event": "Kickoff Call Scheduled",
+            "Client": "={{ [$(\"Find Onboarding Record\").item.json.id] }}",
+            "Note": "=Kickoff call booked for {{ $(\"Cal.com Booking Webhook\").item.json.body.payload.startTime }} (ends {{ $(\"Cal.com Booking Webhook\").item.json.body.payload.endTime }})."
+          },
+          "schema": [
+            {
+              "id": "Event",
+              "displayName": "Event",
+              "required": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "Client",
+              "displayName": "Client",
+              "required": false,
+              "display": true,
+              "type": "array",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "Note",
+              "displayName": "Note",
+              "required": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            }
+          ]
+        },
+        "options": {
+          "typecast": true
+        }
+      },
+      "id": "50971083-59aa-4f55-ac20-3274a71fd0c7",
+      "name": "Log: Kickoff Call Scheduled",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        1136,
+        384
+      ],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "oY7iME868Dyd39Xs",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "#onboarding-alerts",
+          "mode": "name"
+        },
+        "text": "=:calendar: Kickoff call booked for *{{ $('Find Onboarding Record').item.json.fields['Client Name'] }}* ({{ $(\"Cal.com Booking Webhook\").item.json.body.payload.attendees[0].name }}) on {{ $(\"Cal.com Booking Webhook\").item.json.body.payload.startTime }}.",
+        "otherOptions": {}
+      },
+      "id": "7bb087bb-0ec2-423d-938b-bf1df2a508e1",
+      "name": "Slack: Kickoff Booked",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.7,
+      "position": [
+        1360,
+        384
+      ],
+      "webhookId": "17213475-2ab6-438c-b2c5-dcb3919358f0",
+      "credentials": {
+        "slackApi": {
+          "id": "GeeqlF42tZ9iJLdB",
+          "name": "Slack account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "#agency-onboarding-2",
+          "mode": "name"
+        },
+        "text": "=:warning: A Cal.com kickoff booking was received but no matching Onboarding record was found for attendee *{{ $(\"Cal.com Booking Webhook\").item.json.body.payload.attendees[0].name }}* ({{ $(\"Cal.com Booking Webhook\").item.json.body.payload.attendees[0].email }}). Manual review needed.",
+        "otherOptions": {}
+      },
+      "id": "1c89c951-62dd-465d-a47e-c30096b37e85",
+      "name": "Slack Alert: No Match Found",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.7,
+      "position": [
+        912,
+        576
+      ],
+      "webhookId": "72667605-8ab9-48c9-9c4b-118955f82651",
+      "credentials": {
+        "slackApi": {
+          "id": "GeeqlF42tZ9iJLdB",
+          "name": "Slack account 2"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Onboarding Provisioned": {
+      "main": [
+        [
+          {
+            "node": "Send Welcome Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Welcome Email": {
+      "main": [
+        [
+          {
+            "node": "Set Status: Kickoff Pending",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Set Status: Blocked",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Status: Kickoff Pending": {
+      "main": [
+        [
+          {
+            "node": "Log: Welcome Email Sent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Status: Blocked": {
+      "main": [
+        [
+          {
+            "node": "Log: Welcome Email Failed",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Slack Alert: Welcome Email Failed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cal.com Booking Webhook": {
+      "main": [
+        [
+          {
+            "node": "Find Onboarding Record",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find Onboarding Record": {
+      "main": [
+        [
+          {
+            "node": "Match Found?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Match Found?": {
+      "main": [
+        [
+          {
+            "node": "Set Status: Kickoff Scheduled",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Slack Alert: No Match Found",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Status: Kickoff Scheduled": {
+      "main": [
+        [
+          {
+            "node": "Log: Kickoff Call Scheduled",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log: Kickoff Call Scheduled": {
+      "main": [
+        [
+          {
+            "node": "Slack: Kickoff Booked",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "e36907dc-10ce-407a-bf8d-5493eac1c486",
+  "meta": {
+    "instanceId": "0d017aa6e27c5a8626f3090d34f1f540f8d6c22d53106e8f26ac8cd5e7209bf3"
+  },
+  "nodeGroups": [
+    {
+      "id": "61e749aa-5b37-47f6-b67c-d169f47e3235",
+      "name": "Branch A — Welcome Email",
+      "nodeIds": [
+        "1d8e8864-4994-4f3b-851a-d60a5c058c53",
+        "bf788d45-a2b8-4113-9f4e-5307986c0680",
+        "fe649099-23c1-4e34-98f1-42a86461373c",
+        "010ca7f0-d852-42a3-b5fa-92f3b1499545",
+        "283c66d5-3297-418f-9357-83062c34f28f",
+        "331b72e8-5f05-4dec-ae43-b1404568ca79"
+      ],
+      "description": "On Status → Provisioned: send welcome email, set Kickoff Pending, log activity. On email failure: set Blocked, log failure, Slack alert."
+    },
+    {
+      "id": "490fbc52-2943-4942-9aed-c263c769aeb2",
+      "name": "Branch B — Kickoff Booked",
+      "nodeIds": [
+        "d4cd15dd-ad01-47a4-9731-264b6ab7e200",
+        "227e53d3-e0fd-4a47-a567-4a3032ee6996",
+        "98a09666-586c-4ab5-bce8-25970011aaf1",
+        "50971083-59aa-4f55-ac20-3274a71fd0c7",
+        "7bb087bb-0ec2-423d-938b-bf1df2a508e1",
+        "1c89c951-62dd-465d-a47e-c30096b37e85"
+      ],
+      "description": "On Cal.com booking webhook: find onboarding record, set Kickoff Scheduled, log activity, notify team. No match → Slack alert."
+    }
+  ],
+  "id": "7AbEmva5C66hjsgb",
+  "tags": []
+}
