@@ -1,4 +1,5 @@
 # Architecture and Technical Notes
+![Full system, all seven workflows](screenshots/All%20workflows.png)
 
 This document is the detailed companion to the README. It exists so that six months from now, without any memory of building this, you can open this file and reconstruct exactly how each piece works, not just what it does.
 
@@ -57,6 +58,7 @@ Note the use of `%20` rather than `+` for spaces inside the field name portion o
 ---
 
 ## Workflow 1: Deal Won → Onboarding Record Creation
+![Workflow 1 canvas](screenshots/1%20-%20Deal%20Won%20to%20Onboarding.png)
 
 - **Trigger:** Airtable Trigger on Deals, watching a Last Modified Time formula field (the native "Trigger On" field options did not behave as expected, so a formula field was used as a reliable substitute).
 - **Filter node** (not IF): passes only records where Deal Stage equals Closed Won.
@@ -75,6 +77,7 @@ A JSON array literal wrapping a single expression, typed directly into the field
 ---
 
 ## Workflow 2: Contract Generation & Send
+![Workflow 2 canvas](screenshots/2%20-%20Contract%20Generation%20and%20Send%20copy.png)
 
 - **Trigger:** Airtable Trigger on Onboarding, Status equals Deal Won.
 - **Auth note:** PandaDoc uses simple static Header Auth (`Authorization: API-Key {key}`, the literal word "API-Key," not "Bearer") since its API is built around single account API keys rather than OAuth2's expiring token and consent flow.
@@ -86,6 +89,7 @@ A JSON array literal wrapping a single expression, typed directly into the field
 ---
 
 ## Workflow 3: Signature Received → Payment Trigger
+![Workflow 3 canvas](screenshots/3%20-%20PandaDoc%20%E2%86%92%20Airtable%20%E2%86%92%20Paddle%20Onboarding.png)
 
 - **Trigger:** Webhook node, method must be POST (PandaDoc always sends POST; the node defaulted to GET initially, which caused every incoming call to return a 404 since no route existed for that method).
 - **Authentication:** set to None. PandaDoc does not send a checkable header for authentication in the way Header Auth expects. Instead it signs the payload body using the shared key via HMAC and includes the resulting signature in a response header, meant to be verified inside the workflow logic itself rather than checked at the node's auth gate. Setting Header Auth here caused every real request to be rejected with a 403, since the incoming header contains a computed signature hash, never the literal shared key.
@@ -127,6 +131,7 @@ Amount is in the smallest currency unit, cents, hence multiplying the dollar val
 ---
 
 ## Workflow 4: Payment Confirmed → Intake Trigger
+![Workflow 4 canvas](screenshots/4%20-%20Paddle%20Payment%20%E2%86%92%20Onboarding%20Intake.png)
 
 - **Trigger:** Webhook node, POST, Authentication None, same reasoning as Workflow 3's webhook.
 - **Paddle webhook registration:** done through Paddle's dashboard under Developer Tools, in two parts. First, a notification destination is created under Notifications, pointing at the n8n Production URL and selecting the relevant transaction event type. Second, real test events can be fired at that destination through the separate Simulations section, without needing a working checkout page.
@@ -139,6 +144,7 @@ Amount is in the smallest currency unit, cents, hence multiplying the dollar val
 ---
 
 ## Workflow 5: Intake Received → Provisioning
+![Workflow 5 canvas](screenshots/5%20-%20Client%20Onboarding%20Provisioning.png)
 
 - **Trigger:** Airtable Trigger on Intake Data, record created.
 - **Match logic:** Airtable Search on Onboarding, matching against the hidden Onboarding Record ID field carried through from the intake form:
@@ -156,6 +162,7 @@ RECORD_ID() = "{{ $json.fields['Onboarding Record ID'] }}"
 ---
 
 ## Workflow 6: Welcome Email + Kickoff Scheduling
+![Workflow 6 canvas](screenshots/6%20-%20Welcome%20Email%20+%20Kickoff%20Scheduling.png)
 
 Two independent trigger branches inside one workflow file. n8n fully supports multiple trigger nodes in a single workflow; each operates completely independently and starts its own execution whenever it fires, with no dependency on the other branch.
 
@@ -168,6 +175,7 @@ The relationship between the two branches is conceptual, not mechanical. Branch 
 ---
 
 ## Workflow 7: The Sweeper
+![Workflow 7 canvas](screenshots/7%20-%20Onboarding%20SLA%20Nudge%20%26%20Escalate.png)
 
 - **Trigger:** Schedule Trigger, every 2 hours.
 - **Monitored statuses:** Contract Sent, Payment Pending, Payment Confirmed, Kickoff Pending. Chosen specifically because these are the only stages where the system is waiting on the client to take an action; internal automated steps and terminal or already-blocked states are deliberately excluded.
