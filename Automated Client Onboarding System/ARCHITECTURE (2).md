@@ -3,6 +3,7 @@
 This is the detailed companion to the README, covering the revised system built after agency feedback. It exists so that months from now, without memory of building this, you can open this file and reconstruct exactly how each piece works, not just what it does.
 
 This document assumes familiarity with the general patterns already established in the first version: the create-then-log pairing, search-then-branch matching, and "Continue (using error output)" on external calls. What follows focuses on what is new or different here.
+![Workflow 1 canvas](screenshots/all-workflows.png)
 
 ---
 
@@ -24,7 +25,7 @@ Now the actual entry point of the system. Fields cover only what is needed to cr
 ---
 
 ## Workflow 1: Onboarding Intake Automation
-
+![Workflow 1 canvas](screenshots/1-onboarding-intake-automation.png)
 - **Trigger:** Airtable Trigger on Intake Data, record created.
 - **Duplicate check:** Airtable Search on Onboarding:
 ```
@@ -38,12 +39,14 @@ Now the actual entry point of the system. Fields cover only what is needed to cr
 ---
 
 ## Workflow 2: Contract Generation & Sending
+![Workflow 2 canvas](screenshots/2-contract-generation-and-sending.png)
 
 Structurally unchanged from the first version's contract workflow. The trigger condition is now Status equals Price Confirmed instead of Deal Won, and Deal Value is read directly off the Onboarding record. The PandaDoc polling loop, token mapping, and native Google Docs template all carry over unchanged.
 
 ---
 
 ## Workflow 3: Contract Signing, Price Confirmation & Payment Request
+![Workflow 3 canvas](screenshots/3-contract-signing-price-confirmation-payment-request.png)
 
 - **Trigger:** Webhook, POST, Authentication None.
 - **Match logic:** unchanged, matching on PandaDoc Document ID.
@@ -57,6 +60,7 @@ Structurally unchanged from the first version's contract workflow. The trigger c
 ---
 
 ## Workflow 4: Paddle Payment → Provisioning
+![Workflow 4 canvas](screenshots/4-paddle-payment-to-provisioning.png)
 
 This workflow has two independent trigger nodes sitting on the same canvas, converging on one shared path. It is the result of merging what was originally a card-only provisioning trigger with a standalone cash confirmation form, once it became clear a cash-paying client had no automated route into provisioning at all.
 
@@ -73,12 +77,14 @@ This workflow has two independent trigger nodes sitting on the same canvas, conv
 ---
 
 ## Workflow 5: Welcome Email & Kickoff Scheduling
+![Workflow 5 canvas](screenshots/5-welcome-email-kickoff-scheduling.png)
 
 Unchanged from the first version. Two independent triggers: Branch A on Status equals Provisioned sending the welcome email, Branch B listening for a Cal.com booking webhook.
 
 ---
 
 ## Workflow 6: Project Completed & Final Payment Request
+![Workflow 6 canvas](screenshots/6-project-completed-final-payment-request.png)
 
 Mirrors workflow 3's structure, triggered differently and using the remaining balance instead of the deposit.
 
@@ -91,12 +97,14 @@ Mirrors workflow 3's structure, triggered differently and using the remaining ba
 ---
 
 ## Workflow 7: Final Payment Made & Project Closed
+![Workflow 7 canvas](screenshots/7-final-payment-made-project-closed.png)
 
 Same convergence pattern as workflow 4: a Paddle webhook path and a cash confirmation form path (a second form, separate from workflow 4's, confirming the final payment rather than the deposit) both feed into the same shared closing logic, updating Status to Closed and logging the final Activity Log entry. This workflow already had this merge from the start; the gap that needed fixing only existed on the deposit side, in what became workflow 4.
 
 ---
 
 ## Workflow 8: Global Error Handler
+![Workflow 8 canvas](screenshots/8-global-error-handler.png)
 
 A standalone workflow: an Error Trigger node, which n8n automatically calls whenever another workflow fails in a way not otherwise caught inside it, a Code node formatting the incoming error data, and a Slack node posting it.
 
@@ -105,6 +113,7 @@ Every other workflow has this one selected under its own Settings tab, under Err
 ---
 
 ## Workflow 9: The Sweeper
+![Workflow 9 canvas](screenshots/9-sweeper-onboarding-sla-nudge-escalate.png)
 
 Monitors:
 
