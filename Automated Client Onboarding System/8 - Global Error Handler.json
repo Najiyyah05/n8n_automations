@@ -1,0 +1,98 @@
+{
+  "name": "8 - Global Error Handler",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "8c59857f-90a3-4320-8a2d-982c7f4bd0e9",
+      "name": "Error Trigger",
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [
+        176,
+        -48
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const errorData = $json;\n\nconst workflowName = errorData.workflow?.name || errorData.workflow?.id || 'Unknown workflow';\nconst nodeName = errorData.execution?.lastNodeExecuted || errorData.execution?.node?.name || 'Unknown node';\nconst errorMessage = errorData.execution?.error?.message || errorData.error?.message || 'Unknown error';\nconst timestamp = errorData.execution?.startedAt || errorData.execution?.stoppedAt || new Date().toISOString();\n\nreturn [\n  {\n    json: {\n      workflowName,\n      nodeName,\n      errorMessage,\n      timestamp,\n      slackMessage: `🚨 *Workflow Error*\\n\\n*Workflow:* ${workflowName}\\n*Failed at node:* ${nodeName}\\n*Error:* ${errorMessage}\\n*Time:* ${timestamp}\\n\\nCheck the n8n execution log for full details.`\n    }\n  }\n];"
+      },
+      "id": "0aa066bf-9f3a-46f4-bbde-addd1da284eb",
+      "name": "Format Error",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        400,
+        -48
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C0BP4AGGDCZ",
+          "mode": "list",
+          "cachedResultName": "automation-error-alerts"
+        },
+        "text": "={{ $json.slackMessage }}",
+        "otherOptions": {
+          "includeLinkToWorkflow": true
+        }
+      },
+      "id": "eca3447f-db0e-4ba6-b48a-a03ccc428f5b",
+      "name": "Send Error to Slack",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.7,
+      "position": [
+        624,
+        -48
+      ],
+      "webhookId": "24d3b104-5cfd-46cc-b7a7-f31a3460672e",
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "VJKuXoxbqf8YWky7",
+          "name": "Slack account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Error Trigger": {
+      "main": [
+        [
+          {
+            "node": "Format Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Error": {
+      "main": [
+        [
+          {
+            "node": "Send Error to Slack",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "11a58e8b-13c5-4ecc-ae64-b6721a16e104",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "f88e8fce95fde4b7169d704eb5b68572f4089b0b1ded38b81719620fa553cb1b"
+  },
+  "nodeGroups": [],
+  "id": "7fOabLnwSLkEILRx",
+  "tags": []
+}

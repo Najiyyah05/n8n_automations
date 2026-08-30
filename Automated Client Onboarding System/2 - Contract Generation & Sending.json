@@ -1,0 +1,1918 @@
+{
+  "name": "2 - Contract Generation & Sending",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "authentication": "airtableOAuth2Api",
+        "baseId": {
+          "__rl": true,
+          "value": "app3pkhVgoTMbQkFd",
+          "mode": "id"
+        },
+        "tableId": {
+          "__rl": true,
+          "value": "tblbPI6jPtOZT4UmV",
+          "mode": "id"
+        },
+        "triggerField": "Last Status Change",
+        "additionalFields": {
+          "formula": "{Status} = \"Price Confirmed\""
+        }
+      },
+      "id": "5c14402a-9df4-4b7b-9d36-0d0eae35c4bd",
+      "name": "Onboarding Status Trigger",
+      "type": "n8n-nodes-base.airtableTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        320
+      ],
+      "credentials": {
+        "airtableOAuth2Api": {
+          "id": "s35fcmfTjkjRQeF6",
+          "name": "Airtable account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a1",
+              "name": "templateId",
+              "value": "fkMXbFAEeMu52cEnTii2dg",
+              "type": "string"
+            },
+            {
+              "id": "a2",
+              "name": "clientName",
+              "value": "={{ $json.fields['Client Name'] }}",
+              "type": "string"
+            },
+            {
+              "id": "a3",
+              "name": "clientEmail",
+              "value": "={{ $json.fields['Business Email'] }}",
+              "type": "string"
+            },
+            {
+              "id": "a4",
+              "name": "depositAmount",
+              "value": "={{ $json.fields['Deposit Amount'] }}",
+              "type": "string"
+            },
+            {
+              "id": "a5",
+              "name": "effectiveDate",
+              "value": "={{ $json['Effective Date'] }}",
+              "type": "string"
+            },
+            {
+              "id": "a6",
+              "name": "recordId",
+              "value": "={{ $json.id }}",
+              "type": "string"
+            },
+            {
+              "id": "3cec525e-e607-4cc6-8961-56519b60e572",
+              "name": "dealValue",
+              "value": "={{ $json.fields['Deal Value'] }}",
+              "type": "number"
+            },
+            {
+              "id": "6634d117-1976-47ce-84b4-9cee1da41143",
+              "name": "companyName",
+              "value": "={{ $json.fields['Business Name'] }}",
+              "type": "string"
+            },
+            {
+              "id": "566a6293-ae76-4d49-9261-657ad4cff430",
+              "name": "serviceNeeded",
+              "value": "={{ $json.fields['Service Needed'] }}",
+              "type": "array"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "fc90b7aa-739c-41fa-86ea-2b2d0258eb6d",
+      "name": "Prepare Contract Data",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        448,
+        320
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.pandadoc.com/public/v1/documents",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "API-Key 1695702c6bbd5c97aea20e3d82b892df118b454e"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"name\": \"Contract - {{ $json.clientName }}\",\n  \"template_uuid\": \"{{ $json.templateId }}\",\n  \"recipients\": [\n    { \"email\": \"{{ $json.clientEmail }}\", \"first_name\": \"{{ $json.clientName }}\", \"role\": \"Client\" }\n  ],\n  \"tokens\": [\n    { \"name\": \"Client.Name\", \"value\": \"{{ $json.clientName }}\" },\n    { \"name\": \"Client.Email\", \"value\": \"{{ $json.clientEmail }}\" },\n    { \"name\": \"Amount.Tobepaid\", \"value\": \"{{ $json.depositAmount }}\" },\n    { \"name\": \"Business.Name\", \"value\": \"{{ $json.companyName }}\" },\n    { \"name\": \"Deal.Value\", \"value\": \"{{ $json.dealValue }}\" },\n    { \"name\": \"Service.Selected\", \"value\": \"{{ $json.serviceNeeded }}\" },\n    { \"name\": \"Effective.Date\", \"value\": \"{{$now.format('dd-MM-yyyy')}}\" }\n  ]\n}",
+        "options": {}
+      },
+      "id": "7cd70338-89b7-43f1-b943-b5ed2d06060f",
+      "name": "PandaDoc Create Document",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        672,
+        320
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "fc1",
+              "name": "errorMessage",
+              "value": "={{ \"Contract creation failed: \" + JSON.stringify($json) }}",
+              "type": "string"
+            },
+            {
+              "id": "fc2",
+              "name": "recordId",
+              "value": "={{ $(\"Onboarding Status Trigger\").item.json.id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "e863a0aa-775a-4ff4-965d-701634821188",
+      "name": "Failure - Create",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        2240,
+        608
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "t1",
+              "name": "attempt",
+              "value": "={{ ($json.attempt ?? 0) + 1 }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "d836f336-208d-4709-ac41-41cc6961f5c6",
+      "name": "Track Attempt",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        896,
+        224
+      ]
+    },
+    {
+      "parameters": {
+        "amount": 30
+      },
+      "id": "919de0c3-e6f9-461b-90cc-e55c84297e11",
+      "name": "Wait",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1120,
+        144
+      ],
+      "webhookId": "fe0952bb-e445-4076-b480-f30a341d41e0"
+    },
+    {
+      "parameters": {
+        "url": "=https://api.pandadoc.com/public/v1/documents/{{ $(\"PandaDoc Create Document\").item.json.id }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "API-Key 1695702c6bbd5c97aea20e3d82b892df118b454e"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "2d58d0b1-e99f-4088-afb0-f97861f882a5",
+      "name": "Check Document Status",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        1344,
+        144
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e1",
+              "name": "status",
+              "value": "={{ $json.status }}",
+              "type": "string"
+            },
+            {
+              "id": "e2",
+              "name": "attempt",
+              "value": "={{ $(\"Track Attempt\").item.json.attempt }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "9881724c-2241-4e1a-baba-681ff506d620",
+      "name": "Evaluate Status",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        1568,
+        144
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "c1",
+              "leftValue": "={{ $json.status }}",
+              "rightValue": "document.draft",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": "={{ false }}",
+        "options": {}
+      },
+      "id": "958fdd98-0c2e-4067-9677-5dd2dd56c389",
+      "name": "Is Draft?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1792,
+        144
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://api.pandadoc.com/public/v1/documents/{{ $(\"PandaDoc Create Document\").item.json.id }}/send",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "API-Key 1695702c6bbd5c97aea20e3d82b892df118b454e"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"message\": \"Please review and sign your contract.\",\n  \"silent\": false\n}",
+        "options": {}
+      },
+      "id": "ffcfc264-ddbd-4442-8585-f33f90ecadd0",
+      "name": "PandaDoc Send Document",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        2016,
+        96
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "authentication": "airtableOAuth2Api",
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "value": "app3pkhVgoTMbQkFd",
+          "mode": "list",
+          "cachedResultName": "Agency full onboarding system 2 (Copy)",
+          "cachedResultUrl": "https://airtable.com/app3pkhVgoTMbQkFd"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblbPI6jPtOZT4UmV",
+          "mode": "list",
+          "cachedResultName": "Onboarding",
+          "cachedResultUrl": "https://airtable.com/app3pkhVgoTMbQkFd/tblbPI6jPtOZT4UmV"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Status": "Contract Sent",
+            "id": "={{ $('Onboarding Status Trigger').item.json.id }}",
+            "Panda Document ID": "={{ $json.id }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": false
+            },
+            {
+              "id": "Client Name",
+              "displayName": "Client Name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Business Name",
+              "displayName": "Business Name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Business Email",
+              "displayName": "Business Email",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Service Needed",
+              "displayName": "Service Needed",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "options": [
+                {
+                  "name": "AI agent",
+                  "value": "AI agent"
+                },
+                {
+                  "name": "Chatbot",
+                  "value": "Chatbot"
+                },
+                {
+                  "name": "Workflow automation",
+                  "value": "Workflow automation"
+                },
+                {
+                  "name": "RAG system",
+                  "value": "RAG system"
+                },
+                {
+                  "name": "Client onboarding system",
+                  "value": "Client onboarding system"
+                },
+                {
+                  "name": "Lead generation system",
+                  "value": "Lead generation system"
+                },
+                {
+                  "name": "Other",
+                  "value": "Other"
+                }
+              ],
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Brief Project Description",
+              "displayName": "Brief Project Description",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Preferred Timeline",
+              "displayName": "Preferred Timeline",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "ASAP",
+                  "value": "ASAP"
+                },
+                {
+                  "name": "Within a month",
+                  "value": "Within a month"
+                },
+                {
+                  "name": "Flexible",
+                  "value": "Flexible"
+                }
+              ],
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Kickoff Scheduled",
+                  "value": "Kickoff Scheduled"
+                },
+                {
+                  "name": "Contract Sent",
+                  "value": "Contract Sent"
+                },
+                {
+                  "name": "Provisioned",
+                  "value": "Provisioned"
+                },
+                {
+                  "name": "Blocked - Contract SLA exceeded",
+                  "value": "Blocked - Contract SLA exceeded"
+                },
+                {
+                  "name": "Deal Won",
+                  "value": "Deal Won"
+                },
+                {
+                  "name": "Contract Signed",
+                  "value": "Contract Signed"
+                },
+                {
+                  "name": "Payment Confirmed",
+                  "value": "Payment Confirmed"
+                },
+                {
+                  "name": "Intake Received",
+                  "value": "Intake Received"
+                },
+                {
+                  "name": "Provisioning",
+                  "value": "Provisioning"
+                },
+                {
+                  "name": "Welcome Sent",
+                  "value": "Welcome Sent"
+                },
+                {
+                  "name": "Kickoff Pending",
+                  "value": "Kickoff Pending"
+                },
+                {
+                  "name": "Onboarding Complete",
+                  "value": "Onboarding Complete"
+                },
+                {
+                  "name": "Blocked – Payment Link Failed",
+                  "value": "Blocked – Payment Link Failed"
+                },
+                {
+                  "name": "Intake requested",
+                  "value": "Intake requested"
+                },
+                {
+                  "name": "Blocked",
+                  "value": "Blocked"
+                },
+                {
+                  "name": "Blocked – Drive Folder Creation Failed",
+                  "value": "Blocked – Drive Folder Creation Failed"
+                },
+                {
+                  "name": "Blocked – Asana Project Creation Failed",
+                  "value": "Blocked – Asana Project Creation Failed"
+                },
+                {
+                  "name": "Blocked – Slack Channel Creation Failed",
+                  "value": "Blocked – Slack Channel Creation Failed"
+                },
+                {
+                  "name": "Payment Pending",
+                  "value": "Payment Pending"
+                },
+                {
+                  "name": "Price Approval Requested",
+                  "value": "Price Approval Requested"
+                },
+                {
+                  "name": "Price Approved",
+                  "value": "Price Approved"
+                },
+                {
+                  "name": "Initial Payment Link Sent",
+                  "value": "Initial Payment Link Sent"
+                },
+                {
+                  "name": "Initial Payment Confirmed",
+                  "value": "Initial Payment Confirmed"
+                },
+                {
+                  "name": "Initial Payment – Cash Confirmed",
+                  "value": "Initial Payment – Cash Confirmed"
+                },
+                {
+                  "name": "Final Payment Approval Requested",
+                  "value": "Final Payment Approval Requested"
+                },
+                {
+                  "name": "Final Payment Link Sent",
+                  "value": "Final Payment Link Sent"
+                },
+                {
+                  "name": "Final Payment Confirmed",
+                  "value": "Final Payment Confirmed"
+                },
+                {
+                  "name": "Final Payment – Cash Confirmed",
+                  "value": "Final Payment – Cash Confirmed"
+                },
+                {
+                  "name": "Project Completed",
+                  "value": "Project Completed"
+                },
+                {
+                  "name": "Project Closed",
+                  "value": "Project Closed"
+                },
+                {
+                  "name": "Price Confirmed",
+                  "value": "Price Confirmed"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Deal Value",
+              "displayName": "Deal Value",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Deposit Amount",
+              "displayName": "Deposit Amount",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Payment method",
+              "displayName": "Payment method",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "E-payment",
+                  "value": "E-payment"
+                },
+                {
+                  "name": "Cash",
+                  "value": "Cash"
+                }
+              ],
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Cash Confirmation",
+              "displayName": "Cash Confirmation",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "boolean",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Deposit Confirmed By",
+              "displayName": "Deposit Confirmed By",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Last Status Change",
+              "displayName": "Last Status Change",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Notes",
+              "displayName": "Notes",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Imported table",
+              "displayName": "Imported table",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Panda Document ID",
+              "displayName": "Panda Document ID",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Panda Document link",
+              "displayName": "Panda Document link",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Payment link",
+              "displayName": "Payment link",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Payment ID",
+              "displayName": "Payment ID",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Payment status",
+              "displayName": "Payment status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Pending",
+                  "value": "Pending"
+                },
+                {
+                  "name": "Confirmed",
+                  "value": "Confirmed"
+                }
+              ],
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Activity log",
+              "displayName": "Activity log",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "c49ecce6-7655-48ab-bc6b-35f005f84811",
+      "name": "Update Onboarding - Contract Sent",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        2240,
+        0
+      ],
+      "credentials": {
+        "airtableOAuth2Api": {
+          "id": "s35fcmfTjkjRQeF6",
+          "name": "Airtable account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "airtableOAuth2Api",
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "app3pkhVgoTMbQkFd",
+          "mode": "list",
+          "cachedResultName": "Agency full onboarding system 2 (Copy)",
+          "cachedResultUrl": "https://airtable.com/app3pkhVgoTMbQkFd"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblGEXkPtvvMoDNIY",
+          "mode": "list",
+          "cachedResultName": "Activity log",
+          "cachedResultUrl": "https://airtable.com/app3pkhVgoTMbQkFd/tblGEXkPtvvMoDNIY"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Client": "={{ [$('Onboarding Status Trigger').item.json.id] }}",
+            "Event": "Contract sent"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "ID",
+              "displayName": "ID",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Client",
+              "displayName": "Client",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Timestamp",
+              "displayName": "Timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Event",
+              "displayName": "Event",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Note",
+              "displayName": "Note",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "574b988a-7907-4b0e-b8b3-a29e98f74835",
+      "name": "Log Contract Sent",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        2464,
+        0
+      ],
+      "credentials": {
+        "airtableOAuth2Api": {
+          "id": "s35fcmfTjkjRQeF6",
+          "name": "Airtable account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "fs1",
+              "name": "errorMessage",
+              "value": "={{ \"Contract send failed: \" + JSON.stringify($json) }}",
+              "type": "string"
+            },
+            {
+              "id": "fs2",
+              "name": "recordId",
+              "value": "={{ $(\"Onboarding Status Trigger\").item.json.id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "cc387581-9343-4804-bcaa-6f70f3793541",
+      "name": "Failure - Send",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        2240,
+        192
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c2",
+              "leftValue": "={{ $json.attempt }}",
+              "rightValue": 5,
+              "operator": {
+                "type": "number",
+                "operation": "gte"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "9a222058-f778-4670-aa7a-34e8665cd8a5",
+      "name": "Max Attempts Reached?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        2016,
+        416
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ft1",
+              "name": "errorMessage",
+              "value": "Document did not reach draft status after 5 polling attempts.",
+              "type": "string"
+            },
+            {
+              "id": "ft2",
+              "name": "recordId",
+              "value": "={{ $(\"Onboarding Status Trigger\").item.json.id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "0aff6d48-0a52-4ad9-9cbb-00fa6eaf7a4c",
+      "name": "Failure - Poll Timeout",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        2240,
+        416
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "fd1",
+              "name": "errorMessage",
+              "value": "={{ $json.errorMessage }}",
+              "type": "string"
+            },
+            {
+              "id": "fd2",
+              "name": "recordId",
+              "value": "={{ $json.recordId }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "da3708be-b22d-4ac6-aca5-648c52cdfa18",
+      "name": "Failure Details",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        2464,
+        416
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "airtableOAuth2Api",
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "value": "app3pkhVgoTMbQkFd",
+          "mode": "list",
+          "cachedResultName": "Agency full onboarding system 2 (Copy)",
+          "cachedResultUrl": "https://airtable.com/app3pkhVgoTMbQkFd"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblbPI6jPtOZT4UmV",
+          "mode": "list",
+          "cachedResultName": "Onboarding",
+          "cachedResultUrl": "https://airtable.com/app3pkhVgoTMbQkFd/tblbPI6jPtOZT4UmV"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $(\"Failure Details\").item.json.recordId }}",
+            "Status": "Blocked - Contract sent Failed"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": false
+            },
+            {
+              "id": "Client Name",
+              "displayName": "Client Name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Business Name",
+              "displayName": "Business Name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Business Email",
+              "displayName": "Business Email",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Service Needed",
+              "displayName": "Service Needed",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "options": [
+                {
+                  "name": "AI agent",
+                  "value": "AI agent"
+                },
+                {
+                  "name": "Chatbot",
+                  "value": "Chatbot"
+                },
+                {
+                  "name": "Workflow automation",
+                  "value": "Workflow automation"
+                },
+                {
+                  "name": "RAG system",
+                  "value": "RAG system"
+                },
+                {
+                  "name": "Client onboarding system",
+                  "value": "Client onboarding system"
+                },
+                {
+                  "name": "Lead generation system",
+                  "value": "Lead generation system"
+                },
+                {
+                  "name": "Other",
+                  "value": "Other"
+                }
+              ],
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Brief Project Description",
+              "displayName": "Brief Project Description",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Preferred Timeline",
+              "displayName": "Preferred Timeline",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "ASAP",
+                  "value": "ASAP"
+                },
+                {
+                  "name": "Within a month",
+                  "value": "Within a month"
+                },
+                {
+                  "name": "Flexible",
+                  "value": "Flexible"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Kickoff Scheduled",
+                  "value": "Kickoff Scheduled"
+                },
+                {
+                  "name": "Contract Sent",
+                  "value": "Contract Sent"
+                },
+                {
+                  "name": "Provisioned",
+                  "value": "Provisioned"
+                },
+                {
+                  "name": "Blocked - Contract SLA exceeded",
+                  "value": "Blocked - Contract SLA exceeded"
+                },
+                {
+                  "name": "Deal Won",
+                  "value": "Deal Won"
+                },
+                {
+                  "name": "Contract Signed",
+                  "value": "Contract Signed"
+                },
+                {
+                  "name": "Payment Confirmed",
+                  "value": "Payment Confirmed"
+                },
+                {
+                  "name": "Intake Received",
+                  "value": "Intake Received"
+                },
+                {
+                  "name": "Provisioning",
+                  "value": "Provisioning"
+                },
+                {
+                  "name": "Welcome Sent",
+                  "value": "Welcome Sent"
+                },
+                {
+                  "name": "Kickoff Pending",
+                  "value": "Kickoff Pending"
+                },
+                {
+                  "name": "Onboarding Complete",
+                  "value": "Onboarding Complete"
+                },
+                {
+                  "name": "Blocked – Payment Link Failed",
+                  "value": "Blocked – Payment Link Failed"
+                },
+                {
+                  "name": "Intake requested",
+                  "value": "Intake requested"
+                },
+                {
+                  "name": "Blocked",
+                  "value": "Blocked"
+                },
+                {
+                  "name": "Blocked – Drive Folder Creation Failed",
+                  "value": "Blocked – Drive Folder Creation Failed"
+                },
+                {
+                  "name": "Blocked – Asana Project Creation Failed",
+                  "value": "Blocked – Asana Project Creation Failed"
+                },
+                {
+                  "name": "Blocked – Slack Channel Creation Failed",
+                  "value": "Blocked – Slack Channel Creation Failed"
+                },
+                {
+                  "name": "Payment Pending",
+                  "value": "Payment Pending"
+                },
+                {
+                  "name": "Price Approval Requested",
+                  "value": "Price Approval Requested"
+                },
+                {
+                  "name": "Price Approved",
+                  "value": "Price Approved"
+                },
+                {
+                  "name": "Initial Payment Link Sent",
+                  "value": "Initial Payment Link Sent"
+                },
+                {
+                  "name": "Initial Payment Confirmed",
+                  "value": "Initial Payment Confirmed"
+                },
+                {
+                  "name": "Initial Payment – Cash Confirmed",
+                  "value": "Initial Payment – Cash Confirmed"
+                },
+                {
+                  "name": "Final Payment Approval Requested",
+                  "value": "Final Payment Approval Requested"
+                },
+                {
+                  "name": "Final Payment Link Sent",
+                  "value": "Final Payment Link Sent"
+                },
+                {
+                  "name": "Final Payment Confirmed",
+                  "value": "Final Payment Confirmed"
+                },
+                {
+                  "name": "Final Payment – Cash Confirmed",
+                  "value": "Final Payment – Cash Confirmed"
+                },
+                {
+                  "name": "Project Completed",
+                  "value": "Project Completed"
+                },
+                {
+                  "name": "Project Closed",
+                  "value": "Project Closed"
+                },
+                {
+                  "name": "Price Confirmed",
+                  "value": "Price Confirmed"
+                },
+                {
+                  "name": "Blocked - Contract sent Failed",
+                  "value": "Blocked - Contract sent Failed"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Deal Value",
+              "displayName": "Deal Value",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Deposit Amount",
+              "displayName": "Deposit Amount",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": false
+            },
+            {
+              "id": "Payment method",
+              "displayName": "Payment method",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "E-payment",
+                  "value": "E-payment"
+                },
+                {
+                  "name": "Cash",
+                  "value": "Cash"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Cash Confirmation",
+              "displayName": "Cash Confirmation",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "boolean",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Deposit Confirmed By",
+              "displayName": "Deposit Confirmed By",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Last Status Change",
+              "displayName": "Last Status Change",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": false
+            },
+            {
+              "id": "Notes",
+              "displayName": "Notes",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Imported table",
+              "displayName": "Imported table",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Panda Document ID",
+              "displayName": "Panda Document ID",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Panda Document link",
+              "displayName": "Panda Document link",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Payment link",
+              "displayName": "Payment link",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Payment ID",
+              "displayName": "Payment ID",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Payment status",
+              "displayName": "Payment status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Pending",
+                  "value": "Pending"
+                },
+                {
+                  "name": "Confirmed",
+                  "value": "Confirmed"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Activity log",
+              "displayName": "Activity log",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "55333cb5-170d-47ad-825e-80b1c13669ac",
+      "name": "Update Onboarding - Blocked",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        2688,
+        416
+      ],
+      "credentials": {
+        "airtableOAuth2Api": {
+          "id": "s35fcmfTjkjRQeF6",
+          "name": "Airtable account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "airtableOAuth2Api",
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "app3pkhVgoTMbQkFd",
+          "mode": "list",
+          "cachedResultName": "Agency full onboarding system 2 (Copy)",
+          "cachedResultUrl": "https://airtable.com/app3pkhVgoTMbQkFd"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblGEXkPtvvMoDNIY",
+          "mode": "list",
+          "cachedResultName": "Activity log",
+          "cachedResultUrl": "https://airtable.com/app3pkhVgoTMbQkFd/tblGEXkPtvvMoDNIY"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Event": "Contract sending failed"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "ID",
+              "displayName": "ID",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": false
+            },
+            {
+              "id": "Client",
+              "displayName": "Client",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Timestamp",
+              "displayName": "Timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": false
+            },
+            {
+              "id": "Event",
+              "displayName": "Event",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Note",
+              "displayName": "Note",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "1841db6d-00a7-4b59-891d-b2df05912b39",
+      "name": "Log Contract Failure",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        2912,
+        416
+      ],
+      "credentials": {
+        "airtableOAuth2Api": {
+          "id": "s35fcmfTjkjRQeF6",
+          "name": "Airtable account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C0BP4AGGDCZ",
+          "mode": "list",
+          "cachedResultName": "automation-error-alerts"
+        },
+        "text": "={{ \":rotating_light: *Contract send failed*\\nRecord: \" + $(\"Failure Details\").item.json.recordId + \"\\nReason: \" + $(\"Failure Details\").item.json.errorMessage }}",
+        "otherOptions": {}
+      },
+      "id": "3354ab47-df39-44c8-8b0f-1e694e7e3645",
+      "name": "Alert Team on Slack",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.7,
+      "position": [
+        3136,
+        416
+      ],
+      "webhookId": "48a3f1dd-67cb-4a0a-9693-9c875a97bc5e",
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "VJKuXoxbqf8YWky7",
+          "name": "Slack account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "221e9770-280a-4766-9b75-e878024684b2",
+              "leftValue": "={{ $json.fields.Status }}",
+              "rightValue": "Price Confirmed",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        224,
+        320
+      ],
+      "id": "2fd365cd-f2dc-4630-a5c2-035491d586c4",
+      "name": "Filter"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Onboarding Status Trigger": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Contract Data": {
+      "main": [
+        [
+          {
+            "node": "PandaDoc Create Document",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PandaDoc Create Document": {
+      "main": [
+        [
+          {
+            "node": "Track Attempt",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Failure - Create",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Failure - Create": {
+      "main": [
+        [
+          {
+            "node": "Failure Details",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Track Attempt": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Check Document Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Document Status": {
+      "main": [
+        [
+          {
+            "node": "Evaluate Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Evaluate Status": {
+      "main": [
+        [
+          {
+            "node": "Is Draft?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Draft?": {
+      "main": [
+        [
+          {
+            "node": "PandaDoc Send Document",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Max Attempts Reached?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PandaDoc Send Document": {
+      "main": [
+        [
+          {
+            "node": "Update Onboarding - Contract Sent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Failure - Send",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Onboarding - Contract Sent": {
+      "main": [
+        [
+          {
+            "node": "Log Contract Sent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Failure - Send": {
+      "main": [
+        [
+          {
+            "node": "Failure Details",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Max Attempts Reached?": {
+      "main": [
+        [
+          {
+            "node": "Failure - Poll Timeout",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Track Attempt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Failure - Poll Timeout": {
+      "main": [
+        [
+          {
+            "node": "Failure Details",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Failure Details": {
+      "main": [
+        [
+          {
+            "node": "Update Onboarding - Blocked",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Onboarding - Blocked": {
+      "main": [
+        [
+          {
+            "node": "Log Contract Failure",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log Contract Failure": {
+      "main": [
+        [
+          {
+            "node": "Alert Team on Slack",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "Prepare Contract Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "versionId": "0104c1c2-03ea-4046-8058-9ed9f5a1064a",
+  "meta": {
+    "instanceId": "f88e8fce95fde4b7169d704eb5b68572f4089b0b1ded38b81719620fa553cb1b"
+  },
+  "nodeGroups": [],
+  "id": "mE96AowcZggFf3aZ",
+  "tags": []
+}

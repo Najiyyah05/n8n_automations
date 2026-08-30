@@ -1,0 +1,2732 @@
+{
+  "name": "3 - Contract Signing, Price Confirmation + Payment Request",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "pandadoc-signature",
+        "options": {}
+      },
+      "id": "fefb0b37-89a2-4493-9125-bb7a9a832b11",
+      "name": "PandaDoc Signature Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -1968,
+        384
+      ],
+      "webhookId": "pandadoc-signature-event"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.body[0].data.status }}",
+              "rightValue": "document.completed",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              },
+              "id": "568468c1-f490-46f4-bb40-407efa6e4e25"
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "dd83420f-94b2-49a7-a19c-d995de4cfc62",
+      "name": "Document Completed?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -1744,
+        384
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "airtableOAuth2Api",
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "app3pkhVgoTMbQkFd",
+          "mode": "list",
+          "cachedResultName": "Agency full onboarding system 2 (Copy)",
+          "cachedResultUrl": "https://airtable.com/app3pkhVgoTMbQkFd"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblbPI6jPtOZT4UmV",
+          "mode": "list",
+          "cachedResultName": "Onboarding",
+          "cachedResultUrl": "https://airtable.com/app3pkhVgoTMbQkFd/tblbPI6jPtOZT4UmV"
+        },
+        "filterByFormula": "={Panda Document ID} = \"{{ $json.body[0].data.id }}\"",
+        "options": {}
+      },
+      "id": "29e188e2-b6fa-400e-81a9-31f8ee192eaa",
+      "name": "Find Onboarding Record",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        -1520,
+        384
+      ],
+      "credentials": {
+        "airtableOAuth2Api": {
+          "id": "s35fcmfTjkjRQeF6",
+          "name": "Airtable account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.id }}",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "f0d7ea53-554f-4b84-be0a-25cd34d6a0df",
+      "name": "Onboarding Record Found?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -1296,
+        384
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C0BP4AGGDCZ",
+          "mode": "list",
+          "cachedResultName": "automation-error-alerts"
+        },
+        "text": "=🚨 Workflow 3 Error — PandaDoc document completed but no matching Onboarding record was found. Document ID: {{ $json.body.data.id || $json.body.data.document_id }}",
+        "otherOptions": {
+          "includeLinkToWorkflow": false
+        }
+      },
+      "id": "b42ab662-3262-408c-b312-5bc7974cc0cf",
+      "name": "No Onboarding Match Alert",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.7,
+      "position": [
+        -1072,
+        480
+      ],
+      "webhookId": "b0e26589-205a-4050-a41a-adcc43f425ee",
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "VJKuXoxbqf8YWky7",
+          "name": "Slack account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "airtableOAuth2Api",
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "value": "app3pkhVgoTMbQkFd",
+          "mode": "list",
+          "cachedResultName": "Agency full onboarding system 2 (Copy)",
+          "cachedResultUrl": "https://airtable.com/app3pkhVgoTMbQkFd"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblbPI6jPtOZT4UmV",
+          "mode": "list",
+          "cachedResultName": "Onboarding",
+          "cachedResultUrl": "https://airtable.com/app3pkhVgoTMbQkFd/tblbPI6jPtOZT4UmV"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $json.id }}",
+            "Status": "Contract Signed"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true
+            },
+            {
+              "id": "Client Name",
+              "displayName": "Client Name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Business Name",
+              "displayName": "Business Name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Business Email",
+              "displayName": "Business Email",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Service Needed",
+              "displayName": "Service Needed",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "options": [
+                {
+                  "name": "AI agent",
+                  "value": "AI agent"
+                },
+                {
+                  "name": "Chatbot",
+                  "value": "Chatbot"
+                },
+                {
+                  "name": "Workflow automation",
+                  "value": "Workflow automation"
+                },
+                {
+                  "name": "RAG system",
+                  "value": "RAG system"
+                },
+                {
+                  "name": "Client onboarding system",
+                  "value": "Client onboarding system"
+                },
+                {
+                  "name": "Lead generation system",
+                  "value": "Lead generation system"
+                },
+                {
+                  "name": "Other",
+                  "value": "Other"
+                }
+              ],
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Brief Project Description",
+              "displayName": "Brief Project Description",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Preferred Timeline",
+              "displayName": "Preferred Timeline",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "ASAP",
+                  "value": "ASAP"
+                },
+                {
+                  "name": "Within a month",
+                  "value": "Within a month"
+                },
+                {
+                  "name": "Flexible",
+                  "value": "Flexible"
+                }
+              ],
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Kickoff Scheduled",
+                  "value": "Kickoff Scheduled"
+                },
+                {
+                  "name": "Contract Sent",
+                  "value": "Contract Sent"
+                },
+                {
+                  "name": "Provisioned",
+                  "value": "Provisioned"
+                },
+                {
+                  "name": "Blocked - Contract SLA exceeded",
+                  "value": "Blocked - Contract SLA exceeded"
+                },
+                {
+                  "name": "Deal Won",
+                  "value": "Deal Won"
+                },
+                {
+                  "name": "Contract Signed",
+                  "value": "Contract Signed"
+                },
+                {
+                  "name": "Payment Confirmed",
+                  "value": "Payment Confirmed"
+                },
+                {
+                  "name": "Intake Received",
+                  "value": "Intake Received"
+                },
+                {
+                  "name": "Provisioning",
+                  "value": "Provisioning"
+                },
+                {
+                  "name": "Welcome Sent",
+                  "value": "Welcome Sent"
+                },
+                {
+                  "name": "Kickoff Pending",
+                  "value": "Kickoff Pending"
+                },
+                {
+                  "name": "Onboarding Complete",
+                  "value": "Onboarding Complete"
+                },
+                {
+                  "name": "Blocked – Payment Link Failed",
+                  "value": "Blocked – Payment Link Failed"
+                },
+                {
+                  "name": "Intake requested",
+                  "value": "Intake requested"
+                },
+                {
+                  "name": "Blocked",
+                  "value": "Blocked"
+                },
+                {
+                  "name": "Blocked – Drive Folder Creation Failed",
+                  "value": "Blocked – Drive Folder Creation Failed"
+                },
+                {
+                  "name": "Blocked – Asana Project Creation Failed",
+                  "value": "Blocked – Asana Project Creation Failed"
+                },
+                {
+                  "name": "Blocked – Slack Channel Creation Failed",
+                  "value": "Blocked – Slack Channel Creation Failed"
+                },
+                {
+                  "name": "Payment Pending",
+                  "value": "Payment Pending"
+                },
+                {
+                  "name": "Price Approval Requested",
+                  "value": "Price Approval Requested"
+                },
+                {
+                  "name": "Price Approved",
+                  "value": "Price Approved"
+                },
+                {
+                  "name": "Initial Payment Link Sent",
+                  "value": "Initial Payment Link Sent"
+                },
+                {
+                  "name": "Initial Payment Confirmed",
+                  "value": "Initial Payment Confirmed"
+                },
+                {
+                  "name": "Initial Payment – Cash Confirmed",
+                  "value": "Initial Payment – Cash Confirmed"
+                },
+                {
+                  "name": "Final Payment Approval Requested",
+                  "value": "Final Payment Approval Requested"
+                },
+                {
+                  "name": "Final Payment Link Sent",
+                  "value": "Final Payment Link Sent"
+                },
+                {
+                  "name": "Final Payment Confirmed",
+                  "value": "Final Payment Confirmed"
+                },
+                {
+                  "name": "Final Payment – Cash Confirmed",
+                  "value": "Final Payment – Cash Confirmed"
+                },
+                {
+                  "name": "Project Completed",
+                  "value": "Project Completed"
+                },
+                {
+                  "name": "Project Closed",
+                  "value": "Project Closed"
+                },
+                {
+                  "name": "Price Confirmed",
+                  "value": "Price Confirmed"
+                },
+                {
+                  "name": "Blocked - Contract sent Failed",
+                  "value": "Blocked - Contract sent Failed"
+                },
+                {
+                  "name": "Cash Payment Expected",
+                  "value": "Cash Payment Expected"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Deal Value",
+              "displayName": "Deal Value",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Deposit Amount",
+              "displayName": "Deposit Amount",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Payment method",
+              "displayName": "Payment method",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "E-payment",
+                  "value": "E-payment"
+                },
+                {
+                  "name": "Cash",
+                  "value": "Cash"
+                }
+              ],
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Cash Confirmation",
+              "displayName": "Cash Confirmation",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "boolean",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Deposit Confirmed By",
+              "displayName": "Deposit Confirmed By",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Last Status Change",
+              "displayName": "Last Status Change",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Notes",
+              "displayName": "Notes",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Imported table",
+              "displayName": "Imported table",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Panda Document ID",
+              "displayName": "Panda Document ID",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Panda Document link",
+              "displayName": "Panda Document link",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Payment link",
+              "displayName": "Payment link",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Payment ID",
+              "displayName": "Payment ID",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Payment status",
+              "displayName": "Payment status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Pending",
+                  "value": "Pending"
+                },
+                {
+                  "name": "Confirmed",
+                  "value": "Confirmed"
+                }
+              ],
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Activity log",
+              "displayName": "Activity log",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "typecast": true
+        }
+      },
+      "id": "43acc7f2-fd96-42b6-82e4-ce6fc90e791b",
+      "name": "Update Contract Signed",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        -1072,
+        288
+      ],
+      "credentials": {
+        "airtableOAuth2Api": {
+          "id": "s35fcmfTjkjRQeF6",
+          "name": "Airtable account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "authentication": "airtableOAuth2Api",
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "app3pkhVgoTMbQkFd",
+          "mode": "list",
+          "cachedResultName": "Agency full onboarding system 2 (Copy)",
+          "cachedResultUrl": "https://airtable.com/app3pkhVgoTMbQkFd"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblGEXkPtvvMoDNIY",
+          "mode": "list",
+          "cachedResultName": "Activity log",
+          "cachedResultUrl": "https://airtable.com/app3pkhVgoTMbQkFd/tblGEXkPtvvMoDNIY"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Client": "={{ [$('Find Onboarding Record').item.json.id] }}",
+            "Event": "Contract signed by client"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "ID",
+              "displayName": "ID",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Client",
+              "displayName": "Client",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Timestamp",
+              "displayName": "Timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Event",
+              "displayName": "Event",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Note",
+              "displayName": "Note",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "ece35da8-9877-47ef-ba58-380fe1063b96",
+      "name": "Log Contract Signed",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        -848,
+        288
+      ],
+      "credentials": {
+        "airtableOAuth2Api": {
+          "id": "s35fcmfTjkjRQeF6",
+          "name": "Airtable account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "operation": "sendAndWait",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C0BSTFEMWEQ",
+          "mode": "list",
+          "cachedResultName": "payment-approvals"
+        },
+        "message": "=💰 *Payment Amount Confirmation Required*\n\n*Client:* {{ $('Find Onboarding Record').item.json.fields['Client Name'] }}\n*Total Deal Value:* {{ $('Find Onboarding Record').item.json.fields['Deal Value'] }}\n*Calculated 50% Deposit:* {{ $('Find Onboarding Record').item.json.fields['Deposit Amount'] }}\n\nPlease confirm the deposit amount before the payment request is sent to the client.\n\nReply with the confirmed amount. If correction is required, provide the correct numeric amount.",
+        "approvalOptions": {
+          "values": {
+            "approvalType": "double"
+          }
+        },
+        "options": {}
+      },
+      "id": "0a8af9b0-3594-44b1-bca4-9d4c408a3ad4",
+      "name": "Human Confirm Deposit Amount",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.7,
+      "position": [
+        -624,
+        288
+      ],
+      "webhookId": "32e8125e-8777-4088-bfd2-ae9115417535",
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "VJKuXoxbqf8YWky7",
+          "name": "Slack account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('Find Onboarding Record').item.json.fields['Payment method'] }}",
+                    "rightValue": "E-payment",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "789de503-4319-4821-99b8-75eaa9777d1e"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "E-payment"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('Find Onboarding Record').item.json.fields['Payment method'] }}",
+                    "rightValue": "Cash",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "23f59502-95b5-429b-b6a1-4d25e3db33d7"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Cash"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "none"
+        }
+      },
+      "id": "56f3bc3e-5fe0-43c9-8da8-45b1f1dc3887",
+      "name": "Payment Method",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        -176,
+        192
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://sandbox-api.paddle.com/transactions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"items\": [\n    {\n      \"price\": {\n        \"description\": \"{{ $('Find Onboarding Record').item.json.fields['Client Name'] }} - Project Deposit\",\n        \"name\": \"Project Deposit\",\n        \"unit_price\": {\n          \"amount\": \"{{ (parseFloat($('Find Onboarding Record').item.json.fields['Deposit Amount']) * 100).toFixed(0) }}\",\n          \"currency_code\": \"USD\"\n        },\n        \"quantity\": {\n          \"minimum\": 1,\n          \"maximum\": 1\n        },\n        \"product\": {\n          \"name\": \"{{ $('Find Onboarding Record').item.json.fields['Client Name'] }} - Deposit Item\",\n          \"tax_category\": \"standard\"\n        }\n      },\n      \"quantity\": 1\n    }\n  ]\n}\n",
+        "options": {}
+      },
+      "id": "1df0c672-f7c1-449c-8206-342e129d7cde",
+      "name": "Create Paddle Deposit Transaction",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        32,
+        16
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "kVYLyT1RoMGobSoJ",
+          "name": "Header Auth account"
+        },
+        "httpBearerAuth": {
+          "id": "ofvg8j3X9dx18P53",
+          "name": "Bearer Auth account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Find Onboarding Record').item.json.fields['Business Email'] }}",
+        "subject": "Your project deposit payment link",
+        "message": "=Hi {{ $('Find Onboarding Record').item.json.fields['Client Name'] }},<br><br>Your project contract has been signed and we're ready for the next step.<br><br>Your confirmed project deposit is <strong>${{ (parseInt($json.data.items[0].price.unit_price.amount) / 100).toFixed(2) }}\n</strong>.<br><br>Please complete your payment using the link below:<br><br><a href=\"{{ $json.data.checkout.url }}\">Complete deposit payment</a><br><br>Once the deposit is received, we'll proceed with provisioning and arrange your kickoff call.<br><br>Thanks!",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "4ccfee13-60f2-4df5-a198-c4adbac34d20",
+      "name": "Email Deposit Payment Link",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        256,
+        16
+      ],
+      "webhookId": "f87ad58b-fd41-4b65-8723-3a17d0efb796",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "U28LoVzEZnA3OPh5",
+          "name": "Gmail account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "authentication": "airtableOAuth2Api",
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "app3pkhVgoTMbQkFd",
+          "mode": "list",
+          "cachedResultName": "Agency full onboarding system 2 (Copy)",
+          "cachedResultUrl": "https://airtable.com/app3pkhVgoTMbQkFd"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblGEXkPtvvMoDNIY",
+          "mode": "list",
+          "cachedResultName": "Activity log",
+          "cachedResultUrl": "https://airtable.com/app3pkhVgoTMbQkFd/tblGEXkPtvvMoDNIY"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Event": "Deposit Payment Requested",
+            "Note": "=Client: {{ $('Find Onboarding Record').item.json.fields['Client Name'] }} | Method: E-payment | Deposit Amount: {{ (parseInt($('Create Paddle Deposit Transaction').item.json.data.items[0].price.unit_price.amount)/100).toFixed(2)}}\n | Timestamp: {{ $now.format('yyyy-MM-dd') }}",
+            "Client": "={{ [$('Find Onboarding Record').item.json.id] }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "ID",
+              "displayName": "ID",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": false
+            },
+            {
+              "id": "Client",
+              "displayName": "Client",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Timestamp",
+              "displayName": "Timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Event",
+              "displayName": "Event",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Note",
+              "displayName": "Note",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "1e37a238-915f-48c6-b68c-6b396b4cbb20",
+      "name": "Log E-payment Request",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        704,
+        16
+      ],
+      "credentials": {
+        "airtableOAuth2Api": {
+          "id": "s35fcmfTjkjRQeF6",
+          "name": "Airtable account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C0BSTFEMWEQ",
+          "mode": "list",
+          "cachedResultName": "payment-approvals"
+        },
+        "text": "=💵 *Cash payment expected* — Client: *{{ $('Find Onboarding Record').item.json.fields['Client Name'] }}* — Deposit: *{{ $('Parse Confirmed Amount').item.json.confirmedDepositAmount }}*. No payment link sent.",
+        "otherOptions": {
+          "includeLinkToWorkflow": false
+        }
+      },
+      "id": "5af34abf-3527-4fe1-b0ac-5eeeb5ee80d3",
+      "name": "Cash Payment Alert",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.7,
+      "position": [
+        48,
+        288
+      ],
+      "webhookId": "b345f44a-21e3-4c26-b2ca-af04edf388ea",
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "VJKuXoxbqf8YWky7",
+          "name": "Slack account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "authentication": "airtableOAuth2Api",
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "app3pkhVgoTMbQkFd",
+          "mode": "list",
+          "cachedResultName": "Agency full onboarding system 2 (Copy)",
+          "cachedResultUrl": "https://airtable.com/app3pkhVgoTMbQkFd"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblGEXkPtvvMoDNIY",
+          "mode": "list",
+          "cachedResultName": "Activity log",
+          "cachedResultUrl": "https://airtable.com/app3pkhVgoTMbQkFd/tblGEXkPtvvMoDNIY"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Event": "Deposit Payment Requested",
+            "Note": "=Cliet wants to pay by cash: \n\nClient: {{ $('Find Onboarding Record').item.json.fields['Client Name'] }} | Method: Cash | Deposit Amount: {{ $('Find Onboarding Record').item.json.fields['Deposit Amount'] }} | Timestamp: {{ $now }}",
+            "Client": "={{ [$('Find Onboarding Record').item.json.id] }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "ID",
+              "displayName": "ID",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": false
+            },
+            {
+              "id": "Client",
+              "displayName": "Client",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Timestamp",
+              "displayName": "Timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Event",
+              "displayName": "Event",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Note",
+              "displayName": "Note",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "71c24fd9-5e76-41db-b35e-b94840d1c82e",
+      "name": "Log Cash Payment Request",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        272,
+        288
+      ],
+      "credentials": {
+        "airtableOAuth2Api": {
+          "id": "s35fcmfTjkjRQeF6",
+          "name": "Airtable account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "b82e7ff8-2b0b-49da-99da-9f65aa388500",
+              "leftValue": "={{ $json.data.approved }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -400,
+        288
+      ],
+      "id": "e0d15af7-a9a5-42f5-8a29-489b48abfbd5",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C0BSTFEMWEQ",
+          "mode": "list",
+          "cachedResultName": "payment-approvals"
+        },
+        "text": "=Confirm amount to be paid by client:\nName:  {{ $('Find Onboarding Record').item.json.fields['Business Email'] }}\nEmail: {{ $('Find Onboarding Record').item.json.fields['Business Email'] }}\nContract link: ",
+        "otherOptions": {}
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.7,
+      "position": [
+        -176,
+        384
+      ],
+      "id": "469b4a46-4955-4adb-a010-25e555dc3981",
+      "name": "Send a message",
+      "webhookId": "10d26771-8145-4cfa-92ff-9b10986fae0b",
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "VJKuXoxbqf8YWky7",
+          "name": "Slack account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "=https://api.pandadoc.com/public/v1/documents/{{ $('PandaDoc Signature Webhook').item.json.body[0].data.id }}/download",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "API-Key 1695702c6bbd5c97aea20e3d82b892df118b454e"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        -688,
+        -64
+      ],
+      "id": "9e00bae2-5b55-4cff-b6d1-006afa0f7bb2",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "resource": "folder",
+        "name": "={{ $json.fields['Client Name'] }} ",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "1_Fcc4DQ0rhupnuu4zP2g6N2qwuIjeTHu",
+          "mode": "list",
+          "cachedResultName": "Triple AI automation Client (assessment)",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1_Fcc4DQ0rhupnuu4zP2g6N2qwuIjeTHu"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -848,
+        -64
+      ],
+      "id": "b455d358-9db2-40d0-b7f1-055af6371738",
+      "name": "Create folder",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "8PF4uzkTVjvkYZs4",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "name": "={{ $('Find Onboarding Record').item.json.fields['Client Name'] }} Contract agreement.pdf",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "={{ $('Create folder').item.json.id }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -528,
+        -64
+      ],
+      "id": "c06f6c85-f8ec-4709-949d-7183fe993f15",
+      "name": "Upload file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "8PF4uzkTVjvkYZs4",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "airtableOAuth2Api",
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "value": "app3pkhVgoTMbQkFd",
+          "mode": "list",
+          "cachedResultName": "Agency full onboarding system 2 (Copy)",
+          "cachedResultUrl": "https://airtable.com/app3pkhVgoTMbQkFd"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblbPI6jPtOZT4UmV",
+          "mode": "list",
+          "cachedResultName": "Onboarding",
+          "cachedResultUrl": "https://airtable.com/app3pkhVgoTMbQkFd/tblbPI6jPtOZT4UmV"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Panda Document link": "={{ $json.webViewLink }}",
+            "id": "={{ $('Find Onboarding Record').item.json.id }}",
+            "Google drive link": "=https://drive.google.com/drive/folders/{{ $('Create folder').item.json.id }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": false
+            },
+            {
+              "id": "Client Name",
+              "displayName": "Client Name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Business Name",
+              "displayName": "Business Name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Business Email",
+              "displayName": "Business Email",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Service Needed",
+              "displayName": "Service Needed",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "options": [
+                {
+                  "name": "AI agent",
+                  "value": "AI agent"
+                },
+                {
+                  "name": "Chatbot",
+                  "value": "Chatbot"
+                },
+                {
+                  "name": "Workflow automation",
+                  "value": "Workflow automation"
+                },
+                {
+                  "name": "RAG system",
+                  "value": "RAG system"
+                },
+                {
+                  "name": "Client onboarding system",
+                  "value": "Client onboarding system"
+                },
+                {
+                  "name": "Lead generation system",
+                  "value": "Lead generation system"
+                },
+                {
+                  "name": "Other",
+                  "value": "Other"
+                }
+              ],
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Brief Project Description",
+              "displayName": "Brief Project Description",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Preferred Timeline",
+              "displayName": "Preferred Timeline",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "ASAP",
+                  "value": "ASAP"
+                },
+                {
+                  "name": "Within a month",
+                  "value": "Within a month"
+                },
+                {
+                  "name": "Flexible",
+                  "value": "Flexible"
+                }
+              ],
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Kickoff Scheduled",
+                  "value": "Kickoff Scheduled"
+                },
+                {
+                  "name": "Contract Sent",
+                  "value": "Contract Sent"
+                },
+                {
+                  "name": "Provisioned",
+                  "value": "Provisioned"
+                },
+                {
+                  "name": "Blocked - Contract SLA exceeded",
+                  "value": "Blocked - Contract SLA exceeded"
+                },
+                {
+                  "name": "Deal Won",
+                  "value": "Deal Won"
+                },
+                {
+                  "name": "Contract Signed",
+                  "value": "Contract Signed"
+                },
+                {
+                  "name": "Payment Confirmed",
+                  "value": "Payment Confirmed"
+                },
+                {
+                  "name": "Intake Received",
+                  "value": "Intake Received"
+                },
+                {
+                  "name": "Provisioning",
+                  "value": "Provisioning"
+                },
+                {
+                  "name": "Welcome Sent",
+                  "value": "Welcome Sent"
+                },
+                {
+                  "name": "Kickoff Pending",
+                  "value": "Kickoff Pending"
+                },
+                {
+                  "name": "Onboarding Complete",
+                  "value": "Onboarding Complete"
+                },
+                {
+                  "name": "Blocked – Payment Link Failed",
+                  "value": "Blocked – Payment Link Failed"
+                },
+                {
+                  "name": "Intake requested",
+                  "value": "Intake requested"
+                },
+                {
+                  "name": "Blocked",
+                  "value": "Blocked"
+                },
+                {
+                  "name": "Blocked – Drive Folder Creation Failed",
+                  "value": "Blocked – Drive Folder Creation Failed"
+                },
+                {
+                  "name": "Blocked – Asana Project Creation Failed",
+                  "value": "Blocked – Asana Project Creation Failed"
+                },
+                {
+                  "name": "Blocked – Slack Channel Creation Failed",
+                  "value": "Blocked – Slack Channel Creation Failed"
+                },
+                {
+                  "name": "Payment Pending",
+                  "value": "Payment Pending"
+                },
+                {
+                  "name": "Price Approval Requested",
+                  "value": "Price Approval Requested"
+                },
+                {
+                  "name": "Price Approved",
+                  "value": "Price Approved"
+                },
+                {
+                  "name": "Initial Payment Link Sent",
+                  "value": "Initial Payment Link Sent"
+                },
+                {
+                  "name": "Initial Payment Confirmed",
+                  "value": "Initial Payment Confirmed"
+                },
+                {
+                  "name": "Initial Payment – Cash Confirmed",
+                  "value": "Initial Payment – Cash Confirmed"
+                },
+                {
+                  "name": "Final Payment Approval Requested",
+                  "value": "Final Payment Approval Requested"
+                },
+                {
+                  "name": "Final Payment Link Sent",
+                  "value": "Final Payment Link Sent"
+                },
+                {
+                  "name": "Final Payment Confirmed",
+                  "value": "Final Payment Confirmed"
+                },
+                {
+                  "name": "Final Payment – Cash Confirmed",
+                  "value": "Final Payment – Cash Confirmed"
+                },
+                {
+                  "name": "Project Completed",
+                  "value": "Project Completed"
+                },
+                {
+                  "name": "Project Closed",
+                  "value": "Project Closed"
+                },
+                {
+                  "name": "Price Confirmed",
+                  "value": "Price Confirmed"
+                },
+                {
+                  "name": "Blocked - Contract sent Failed",
+                  "value": "Blocked - Contract sent Failed"
+                },
+                {
+                  "name": "Cash Payment Expected",
+                  "value": "Cash Payment Expected"
+                }
+              ],
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Deal Value",
+              "displayName": "Deal Value",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Deposit Amount",
+              "displayName": "Deposit Amount",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Payment method",
+              "displayName": "Payment method",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "E-payment",
+                  "value": "E-payment"
+                },
+                {
+                  "name": "Cash",
+                  "value": "Cash"
+                }
+              ],
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Cash Confirmation",
+              "displayName": "Cash Confirmation",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "boolean",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Deposit Confirmed By",
+              "displayName": "Deposit Confirmed By",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Last Status Change",
+              "displayName": "Last Status Change",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Notes",
+              "displayName": "Notes",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Imported table",
+              "displayName": "Imported table",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Panda Document ID",
+              "displayName": "Panda Document ID",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Panda Document link",
+              "displayName": "Panda Document link",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Google drive link",
+              "displayName": "Google drive link",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Payment link",
+              "displayName": "Payment link",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Payment ID",
+              "displayName": "Payment ID",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Payment status",
+              "displayName": "Payment status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Pending",
+                  "value": "Pending"
+                },
+                {
+                  "name": "Confirmed",
+                  "value": "Confirmed"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Activity log",
+              "displayName": "Activity log",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        -368,
+        -64
+      ],
+      "id": "d8c5f3e9-7755-4eef-a0d0-d85e854b8c78",
+      "name": "Update record",
+      "credentials": {
+        "airtableOAuth2Api": {
+          "id": "s35fcmfTjkjRQeF6",
+          "name": "Airtable account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "airtableOAuth2Api",
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "app3pkhVgoTMbQkFd",
+          "mode": "list",
+          "cachedResultName": "Agency full onboarding system 2 (Copy)",
+          "cachedResultUrl": "https://airtable.com/app3pkhVgoTMbQkFd"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblGEXkPtvvMoDNIY",
+          "mode": "list",
+          "cachedResultName": "Activity log",
+          "cachedResultUrl": "https://airtable.com/app3pkhVgoTMbQkFd/tblGEXkPtvvMoDNIY"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Client": "={{ [$('Find Onboarding Record').item.json.id] }}",
+            "Event": "Contract uploaded to google drive"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "ID",
+              "displayName": "ID",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Client",
+              "displayName": "Client",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Timestamp",
+              "displayName": "Timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Event",
+              "displayName": "Event",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Note",
+              "displayName": "Note",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        -208,
+        -64
+      ],
+      "id": "9fa33c96-e80e-4bd0-9573-b807de68583b",
+      "name": "Create a record",
+      "credentials": {
+        "airtableOAuth2Api": {
+          "id": "s35fcmfTjkjRQeF6",
+          "name": "Airtable account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Find Onboarding Record').item.json.fields['Business Email'] }}",
+        "subject": "Cash payment",
+        "message": "=Your signed document have been received.\nAfter you make payment in cash a link will be sent to you where you'll input a unique ID.\n<br>\nHere is your ID: {{ $('Find Onboarding Record').item.json.fields['Panda Document ID'] }}\n<br>\n\n<b>Do not share with anyone!</b>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        496,
+        288
+      ],
+      "id": "6b4581c2-86d3-4036-919a-cf2a9d8ff371",
+      "name": "Send a message1",
+      "webhookId": "acc6161c-913e-46fb-b5c4-9adcc5ffa080",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "U28LoVzEZnA3OPh5",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "airtableOAuth2Api",
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "value": "app3pkhVgoTMbQkFd",
+          "mode": "list",
+          "cachedResultName": "Agency full onboarding system 2 (Copy)",
+          "cachedResultUrl": "https://airtable.com/app3pkhVgoTMbQkFd"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblbPI6jPtOZT4UmV",
+          "mode": "list",
+          "cachedResultName": "Onboarding",
+          "cachedResultUrl": "https://airtable.com/app3pkhVgoTMbQkFd/tblbPI6jPtOZT4UmV"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $('Find Onboarding Record').item.json.id }}",
+            "Status": "Initial Payment Link Sent",
+            "Payment link": "={{ $('Create Paddle Deposit Transaction').item.json.data.checkout.url }}",
+            "Payment status": "Pending",
+            "Payment ID": "={{ $('Create Paddle Deposit Transaction').item.json.data.id }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": false
+            },
+            {
+              "id": "Client Name",
+              "displayName": "Client Name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Business Name",
+              "displayName": "Business Name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Business Email",
+              "displayName": "Business Email",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Service Needed",
+              "displayName": "Service Needed",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "options": [
+                {
+                  "name": "AI agent",
+                  "value": "AI agent"
+                },
+                {
+                  "name": "Chatbot",
+                  "value": "Chatbot"
+                },
+                {
+                  "name": "Workflow automation",
+                  "value": "Workflow automation"
+                },
+                {
+                  "name": "RAG system",
+                  "value": "RAG system"
+                },
+                {
+                  "name": "Client onboarding system",
+                  "value": "Client onboarding system"
+                },
+                {
+                  "name": "Lead generation system",
+                  "value": "Lead generation system"
+                },
+                {
+                  "name": "Other",
+                  "value": "Other"
+                }
+              ],
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Brief Project Description",
+              "displayName": "Brief Project Description",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Preferred Timeline",
+              "displayName": "Preferred Timeline",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "ASAP",
+                  "value": "ASAP"
+                },
+                {
+                  "name": "Within a month",
+                  "value": "Within a month"
+                },
+                {
+                  "name": "Flexible",
+                  "value": "Flexible"
+                }
+              ],
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Kickoff Scheduled",
+                  "value": "Kickoff Scheduled"
+                },
+                {
+                  "name": "Contract Sent",
+                  "value": "Contract Sent"
+                },
+                {
+                  "name": "Provisioned",
+                  "value": "Provisioned"
+                },
+                {
+                  "name": "Blocked - Contract SLA exceeded",
+                  "value": "Blocked - Contract SLA exceeded"
+                },
+                {
+                  "name": "Deal Won",
+                  "value": "Deal Won"
+                },
+                {
+                  "name": "Contract Signed",
+                  "value": "Contract Signed"
+                },
+                {
+                  "name": "Payment Confirmed",
+                  "value": "Payment Confirmed"
+                },
+                {
+                  "name": "Intake Received",
+                  "value": "Intake Received"
+                },
+                {
+                  "name": "Provisioning",
+                  "value": "Provisioning"
+                },
+                {
+                  "name": "Welcome Sent",
+                  "value": "Welcome Sent"
+                },
+                {
+                  "name": "Kickoff Pending",
+                  "value": "Kickoff Pending"
+                },
+                {
+                  "name": "Onboarding Complete",
+                  "value": "Onboarding Complete"
+                },
+                {
+                  "name": "Blocked – Payment Link Failed",
+                  "value": "Blocked – Payment Link Failed"
+                },
+                {
+                  "name": "Intake requested",
+                  "value": "Intake requested"
+                },
+                {
+                  "name": "Blocked",
+                  "value": "Blocked"
+                },
+                {
+                  "name": "Blocked – Drive Folder Creation Failed",
+                  "value": "Blocked – Drive Folder Creation Failed"
+                },
+                {
+                  "name": "Blocked – Asana Project Creation Failed",
+                  "value": "Blocked – Asana Project Creation Failed"
+                },
+                {
+                  "name": "Blocked – Slack Channel Creation Failed",
+                  "value": "Blocked – Slack Channel Creation Failed"
+                },
+                {
+                  "name": "Payment Pending",
+                  "value": "Payment Pending"
+                },
+                {
+                  "name": "Price Approval Requested",
+                  "value": "Price Approval Requested"
+                },
+                {
+                  "name": "Price Approved",
+                  "value": "Price Approved"
+                },
+                {
+                  "name": "Initial Payment Link Sent",
+                  "value": "Initial Payment Link Sent"
+                },
+                {
+                  "name": "Initial Payment Confirmed",
+                  "value": "Initial Payment Confirmed"
+                },
+                {
+                  "name": "Initial Payment – Cash Confirmed",
+                  "value": "Initial Payment – Cash Confirmed"
+                },
+                {
+                  "name": "Final Payment Approval Requested",
+                  "value": "Final Payment Approval Requested"
+                },
+                {
+                  "name": "Final Payment Link Sent",
+                  "value": "Final Payment Link Sent"
+                },
+                {
+                  "name": "Final Payment Confirmed",
+                  "value": "Final Payment Confirmed"
+                },
+                {
+                  "name": "Final Payment – Cash Confirmed",
+                  "value": "Final Payment – Cash Confirmed"
+                },
+                {
+                  "name": "Project Completed",
+                  "value": "Project Completed"
+                },
+                {
+                  "name": "Project Closed",
+                  "value": "Project Closed"
+                },
+                {
+                  "name": "Price Confirmed",
+                  "value": "Price Confirmed"
+                },
+                {
+                  "name": "Blocked - Contract sent Failed",
+                  "value": "Blocked - Contract sent Failed"
+                },
+                {
+                  "name": "Cash Payment Expected",
+                  "value": "Cash Payment Expected"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Deal Value",
+              "displayName": "Deal Value",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Deposit Amount",
+              "displayName": "Deposit Amount",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Payment method",
+              "displayName": "Payment method",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "E-payment",
+                  "value": "E-payment"
+                },
+                {
+                  "name": "Cash",
+                  "value": "Cash"
+                }
+              ],
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Cash Confirmation",
+              "displayName": "Cash Confirmation",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "boolean",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Deposit Confirmed By",
+              "displayName": "Deposit Confirmed By",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Last Status Change",
+              "displayName": "Last Status Change",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Notes",
+              "displayName": "Notes",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Imported table",
+              "displayName": "Imported table",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Panda Document ID",
+              "displayName": "Panda Document ID",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Panda Document link",
+              "displayName": "Panda Document link",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Google drive link",
+              "displayName": "Google drive link",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Asana Link",
+              "displayName": "Asana Link",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Payment link",
+              "displayName": "Payment link",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Payment ID",
+              "displayName": "Payment ID",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Payment Link Final",
+              "displayName": "Payment Link Final",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Payment ID Final",
+              "displayName": "Payment ID Final",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Payment status",
+              "displayName": "Payment status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Pending",
+                  "value": "Pending"
+                },
+                {
+                  "name": "Confirmed",
+                  "value": "Confirmed"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Activity log",
+              "displayName": "Activity log",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        480,
+        16
+      ],
+      "id": "42eb9e20-32d7-4d0b-ade4-27d0503a2390",
+      "name": "Update payment status",
+      "credentials": {
+        "airtableOAuth2Api": {
+          "id": "s35fcmfTjkjRQeF6",
+          "name": "Airtable account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "PandaDoc Signature Webhook": {
+      "main": [
+        [
+          {
+            "node": "Document Completed?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Document Completed?": {
+      "main": [
+        [
+          {
+            "node": "Find Onboarding Record",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find Onboarding Record": {
+      "main": [
+        [
+          {
+            "node": "Onboarding Record Found?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Onboarding Record Found?": {
+      "main": [
+        [
+          {
+            "node": "Update Contract Signed",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Onboarding Match Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Contract Signed": {
+      "main": [
+        [
+          {
+            "node": "Log Contract Signed",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Create folder",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Log Contract Signed": {
+      "main": [
+        [
+          {
+            "node": "Human Confirm Deposit Amount",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Human Confirm Deposit Amount": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Payment Method": {
+      "main": [
+        [
+          {
+            "node": "Create Paddle Deposit Transaction",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Cash Payment Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Paddle Deposit Transaction": {
+      "main": [
+        [
+          {
+            "node": "Email Deposit Payment Link",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Email Deposit Payment Link": {
+      "main": [
+        [
+          {
+            "node": "Update payment status",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Cash Payment Alert": {
+      "main": [
+        [
+          {
+            "node": "Log Cash Payment Request",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Payment Method",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Upload file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create folder": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload file": {
+      "main": [
+        [
+          {
+            "node": "Update record",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update record": {
+      "main": [
+        [
+          {
+            "node": "Create a record",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log Cash Payment Request": {
+      "main": [
+        [
+          {
+            "node": "Send a message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update payment status": {
+      "main": [
+        [
+          {
+            "node": "Log E-payment Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "errorWorkflow": "7fOabLnwSLkEILRx",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "versionId": "12160dc2-25de-41e0-b4f2-09c45362d52a",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "f88e8fce95fde4b7169d704eb5b68572f4089b0b1ded38b81719620fa553cb1b"
+  },
+  "nodeGroups": [
+    {
+      "id": "64bcf034-b90d-4381-8e2b-efcb346de63a",
+      "name": "Upload contract to google drive",
+      "nodeIds": [
+        "9e00bae2-5b55-4cff-b6d1-006afa0f7bb2",
+        "b455d358-9db2-40d0-b7f1-055af6371738",
+        "c06f6c85-f8ec-4709-949d-7183fe993f15",
+        "d8c5f3e9-7755-4eef-a0d0-d85e854b8c78",
+        "9fa33c96-e80e-4bd0-9573-b807de68583b"
+      ]
+    }
+  ],
+  "id": "7rohkeYZRu009PYS",
+  "tags": []
+}
